@@ -44,6 +44,7 @@
       const TARGET_H = 24;
       const FPS = 15;
       const INTERVAL = 1000 / FPS;
+      let nextTick = performance.now() + INTERVAL;
 
       const bwCanvas = document.getElementById('bw');
       const bwCtx = bwCanvas.getContext('2d', { willReadFrequently: true });
@@ -69,6 +70,11 @@
       }
 
       async function loop() {
+        // Fixed timestep at 15 FPS
+        const now = performance.now();
+        if (now < nextTick) {
+          setTimeout(loop, Math.max(0, nextTick - now));
+          return;
         }
         nextTick += INTERVAL;
         const source = findDosCanvas();
