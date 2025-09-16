@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>DOOM</title>
+    <style type="text/css">
+      .dosbox-container { width: 640px; height: 400px; }
+      .dosbox-container > .dosbox-overlay { background: url(https://js-dos.com/cdn/DOOM.png); }
+      body { font-family: Arial, sans-serif; padding: 16px; }
+      #dosbox { border: 1px solid #333; }
+    </style>
+  </head>
+  <body>
+    <h1>DOOM (js-dos)</h1>
+    <div id="dosbox"></div>
+    <div style="margin-top:12px">
+      <div style="font-size:14px;margin-bottom:6px">Flipboard preview (84×24, B/W)</div>
+      <canvas id="preview" width="84" height="24" style="
+        border:1px solid #333;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        width: 840px; height: 240px;
+        background:#000;
+      "></canvas>
+    </div>
+    <canvas id="bw" width="84" height="24" style="display:none"></canvas>
+    <br/>
+    <button onclick="dosbox.requestFullScreen();">Make fullscreen</button>
+    <script type="text/javascript" src="https://js-dos.com/cdn/js-dos-api.js"></script>
+    <script type="text/javascript">
+      var dosbox = new Dosbox({
+        id: "dosbox",
+        onload: function (dosbox) {
+          dosbox.run("/DOOM.zip", "DOOM.EXE");
+        },
+        onrun: function (dosbox, app) {
+          console.log("App '" + app + "' is running");
+        }
+      });
+
+      // Capture the Dosbox canvas, downscale to 84x28, threshold to B/W, send at 15 FPS
+      const TARGET_W = 84;
+      const TARGET_H = 24;
+      const FPS = 15;
+      const INTERVAL = 1000 / FPS;
+      let nextTick = performance.now() + INTERVAL;
+
+      const bwCanvas = document.getElementById('bw');
+      const bwCtx = bwCanvas.getContext('2d', { willReadFrequently: true });
+      const previewCanvas = document.getElementById('preview');
+      const previewCtx = previewCanvas.getContext('2d');
+
+      // Sobel kernels (inspired by three.js Sobel example)
+      // https://threejs.org/examples/webgl_postprocessing_sobel.html
+      const KERNEL_GX = [
+        -1, 0, 1,
+        -2, 0, 2,
+        -1, 0, 1
+      ];
+      const KERNEL_GY = [
+         1,  2,  1,
+         0,  0,  0,
+        -1, -2, -1
+      ];
+
+      function findDosCanvas() {
+        const container = document.getElementById('dosbox');
+        return container ? container.querySelector('canvas') : null;
+      }
+
+      async function loop() {
+        // Fixed timestep at 15 FPS
+        const now = performance.now();
+        if (now < nextTick) {
+          setTimeout(loop, Math.max(0, nextTick - now));
+          return;
+        }
+        nextTick += INTERVAL;
+        const source = findDosCanvas();
+        if (source) {
+          // Draw to 84x28 with nearest neighbor-like effect
+          bwCtx.imageSmoothingEnabled = false;
+          bwCtx.clearRect(0, 0, TARGET_W, TARGET_H);
+          // Crop out the DOOM status bar (HUD) at the bottom (~32px of 200px)
+          const sw = source.width;
+          const sh = source.height;
+          const hudHeight = Math.round(sh * (32 / 200));
+          const cropY = 0;
+          const cropH = Math.max(1, sh - hudHeight);
+          bwCtx.drawImage(source, 0, cropY, sw, cropH, 0, 0, TARGET_W, TARGET_H);
+
+          // Edge-enhanced threshold to black/white (Sobel)
+          const img = bwCtx.getImageData(0, 0, TARGET_W, TARGET_H);
+          const data = img.data;
+          const w = TARGET_W;
+          const h = TARGET_H;
+          const gray = new Uint8ClampedArray(w * h);
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const idx = (y * w + x) * 4;
+              const r = data[idx];
+              const g = data[idx + 1];
+              const b = data[idx + 2];
+              gray[y * w + x] = (r + g + b) / 3;
+            }
+          }
+          const edges = new Uint16Array(w * h);
+          for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+              let gx = 0, gy = 0, k = 0;
+              for (let ky = -1; ky <= 1; ky++) {
+                for (let kx = -1; kx <= 1; kx++) {
+                  const v = gray[(y + ky) * w + (x + kx)];
+                  gx += v * KERNEL_GX[k];
+                  gy += v * KERNEL_GY[k];
+                  k++;
+                }
+              }
+              const mag = Math.min(255, Math.hypot(gx, gy) | 0);
+              edges[y * w + x] = mag;
+            }
+          }
+          const EDGE_THRESHOLD = 90; // tune to taste
+          const WALL_EDGE_THRESHOLD = 120; // higher threshold for walls only
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const idx = (y * w + x) * 4;
+              const brightness = gray[y * w + x];
+              const edge = edges[y * w + x] || 0;
+              // Keep original bright pixels OR only very strong edges (thick walls)
+              // This prevents the whole screen from being too white
+              // Lower brightness threshold to make gun more visible
+              const v = (brightness > 100 || edge > WALL_EDGE_THRESHOLD) ? 255 : 0;
+              data[idx] = v; data[idx + 1] = v; data[idx + 2] = v; data[idx + 3] = 255;
+            }
+          }
+          bwCtx.putImageData(img, 0, 0);
+
+          // Draw onto on-page preview (stretched by CSS with nearest-neighbor)
+          previewCtx.imageSmoothingEnabled = false;
+          previewCtx.clearRect(0, 0, TARGET_W, TARGET_H);
+          previewCtx.drawImage(bwCanvas, 0, 0);
+
+          // Upload PNG to server
+          bwCanvas.toBlob(async (blob) => {
+            if (!blob) return;
+            try {
+              await fetch('/upload-frame', { method: 'POST', body: blob });
+            } catch (e) {
+              console.warn('Upload failed', e);
+            }
+          }, 'image/png');
+        }
+        // Account for processing time drift
+        const after = performance.now();
+        setTimeout(loop, Math.max(0, nextTick - after));
+      }
+      setTimeout(loop, INTERVAL);
+    </script>
+  </body>
+  </html>
+
+
