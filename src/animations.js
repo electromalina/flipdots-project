@@ -94,14 +94,6 @@ export function createPlayPauseAnimation(ctx, width, height, isPlaying) {
             frameCtx.fill();
         }
         
-        // Add subtle glow effect
-        frameCtx.strokeStyle = '#fff';
-        frameCtx.lineWidth = 1;
-        frameCtx.globalAlpha = 0.3;
-        frameCtx.beginPath();
-        frameCtx.arc(centerX, centerY, size + 2, 0, Math.PI * 2);
-        frameCtx.stroke();
-        frameCtx.globalAlpha = 1;
         
         frames.push(frame);
     }

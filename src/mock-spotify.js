@@ -161,5 +161,15 @@ export function nextTrack() {
     currentTrackIndex = (currentTrackIndex + 1) % MOCK_TRACKS.length;
     startTime = Date.now();
     pausedProgress = 0;
+    isPlaying = true; // Resume playback when changing tracks
+    return getCurrentTrack();
+}
+
+// Go to previous track
+export function previousTrack() {
+    currentTrackIndex = (currentTrackIndex - 1 + MOCK_TRACKS.length) % MOCK_TRACKS.length;
+    startTime = Date.now();
+    pausedProgress = 0;
+    isPlaying = true; // Resume playback when changing tracks
     return getCurrentTrack();
 }

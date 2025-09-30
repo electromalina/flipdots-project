@@ -5,12 +5,19 @@ import path from "node:path";
 import { FPS, LAYOUT } from "./settings.js";
 import { Display } from "@owowagency/flipdot-emu";
 import { setButtonHandler } from "./preview.js";
-import { getCurrentTrack, getAlbumArt, togglePlayback, nextTrack } from "./mock-spotify.js";
 import { floydSteinbergDither } from "./dithering.js";
 import { createBackAnimation, createPlayPauseAnimation, createForwardAnimation } from "./animations.js";
+import { MusicServiceFactory, DEFAULT_CONFIG } from "./services/music-service-factory.js";
+import { APP_CONFIG } from "./config/app-config.js";
 
 
-const IS_DEV = process.argv.includes("--dev");
+const IS_DEV = APP_CONFIG.dev.isDev;
+
+// Initialize music service
+const musicService = MusicServiceFactory.createService({
+    serviceType: APP_CONFIG.musicService.type,
+    spotifyConfig: APP_CONFIG.musicService.spotify
+});
 
 // Create display
 const display = new Display({
@@ -31,13 +38,13 @@ const display = new Display({
 const { width, height } = display;
 
 // Create output directory if it doesn't exist
-const outputDir = "./output";
+const outputDir = APP_CONFIG.dev.outputDir;
 if (!fs.existsSync(outputDir)) {
 	fs.mkdirSync(outputDir, { recursive: true });
 }
 
 // Create mock-data directory if it doesn't exist
-const mockDataDir = "./mock-data";
+const mockDataDir = APP_CONFIG.dev.mockDataDir;
 if (!fs.existsSync(mockDataDir)) {
 	fs.mkdirSync(mockDataDir, { recursive: true });
 	console.log(`Created ${mockDataDir} directory. Please add sample album art images there.`);
@@ -112,7 +119,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
 // Function to update track data
 async function updateTrackData() {
 	try {
-		const newTrackData = getCurrentTrack();
+		const newTrackData = musicService.getCurrentTrack();
 
 		// If we have new track data and it's different from current one
 		if (newTrackData &&
@@ -120,7 +127,7 @@ async function updateTrackData() {
 				newTrackData.track !== currentTrackData.track)) {
 
 			// Get album art with Atkinson dithering for better low-res
-			albumArtCanvas = await getAlbumArt(
+			albumArtCanvas = await musicService.getAlbumArt(
 				newTrackData,
 				42,  // Use half display width or 28px max
 				height
@@ -154,8 +161,10 @@ function triggerAnimation(type) {
 			break;
 	}
 	
-	// Animation duration (in milliseconds)
-	const animationDuration = 1000;
+	// Animation duration (in milliseconds) - faster for next/back
+	const animationDuration = type === 'back' || type === 'forward' 
+		? APP_CONFIG.animations.nextBackDuration 
+		: APP_CONFIG.animations.playPauseDuration;
 	
 	// Stop animation after duration
 	setTimeout(() => {
@@ -171,18 +180,19 @@ function handleButtonAction(action) {
 		case 'back':
 			// Go to previous track
 			console.log('Back button pressed');
+			musicService.previousTrack();
 			triggerAnimation('back');
 			break;
 		case 'playpause':
 			// Toggle play/pause
 			console.log('Play/Pause button pressed');
-			togglePlayback();
+			musicService.togglePlayback();
 			triggerAnimation('playpause');
 			break;
 		case 'forward':
 			// Go to next track
 			console.log('Forward button pressed');
-			nextTrack();
+			musicService.nextTrack();
 			triggerAnimation('forward');
 			break;
 	}
@@ -211,8 +221,10 @@ ticker.start(async ({ deltaTime, elapsedTime }) => {
 
 	// Check if we're playing a button animation
 	if (animationPlaying && animationFrames.length > 0) {
-		// Play animation frames
-		const frameRate = 8; // 8 FPS for animations
+		// Play animation frames - faster for next/back animations
+		const frameRate = (currentAnimation === 'back' || currentAnimation === 'forward') 
+			? APP_CONFIG.animations.nextBackFrameRate 
+			: APP_CONFIG.animations.playPauseFrameRate;
 		const frameTime = 1000 / frameRate;
 		const elapsed = Date.now() - animationStartTime;
 		animationFrameIndex = Math.floor(elapsed / frameTime) % animationFrames.length;
@@ -263,32 +275,22 @@ ticker.start(async ({ deltaTime, elapsedTime }) => {
 			const textY = height / 2;
 			ctx.fillText(noMusicMsg, textX, textY);
 		} else {
-			// Show paused track info
-			const albumSize = Math.min(42, height);
-			if (albumArtCanvas) {
-				ctx.drawImage(albumArtCanvas, 0, 0, albumSize, height);
-			}
-			const margin = 5;
-			const albumWidth = albumSize;
-			const textX = albumWidth + margin;
-			const textAreaWidth = width - textX - 2;
-			let textY = 2;
+			// Show full-screen pause display with big centered pause icon
 			ctx.fillStyle = "#fff";
-			ctx.font = '5px "cg-pixel-4x5"';
-			// Song name
-			if (currentTrackData.track) {
-				textY = drawWrappedText(ctx, currentTrackData.track, textX, textY, textAreaWidth, 6, 2);
-				textY += 2;
-			}
-			// Artist name
-			if (currentTrackData.artist) {
-				ctx.font = '5px "cg-pixel-4x5"';
-				textY = drawWrappedText(ctx, currentTrackData.artist, textX, textY, textAreaWidth, 6, 2);
-			}
-			// Paused indicator
-			ctx.fillStyle = "#666";
-			ctx.font = '4px "cg-pixel-4x5"';
-			ctx.fillText("PAUSED", textX, height - 8);
+			
+			// Center coordinates
+			const centerX = Math.floor(width / 2);
+			const centerY = Math.floor(height / 2);
+			
+			// Draw big pause icon in the center
+			const iconSize = Math.min(width, height) * 0.6; // 60% of the smaller dimension
+			const barWidth = Math.max(3, Math.floor(iconSize * 0.15)); // 15% of icon size, minimum 3px
+			const barHeight = Math.floor(iconSize);
+			const gap = Math.max(4, Math.floor(iconSize * 0.2)); // 20% of icon size, minimum 4px
+			
+			// Draw two vertical bars for pause icon
+			ctx.fillRect(centerX - gap/2 - barWidth, centerY - barHeight/2, barWidth, barHeight);
+			ctx.fillRect(centerX + gap/2, centerY - barHeight/2, barWidth, barHeight);
 		}
 	}
 
