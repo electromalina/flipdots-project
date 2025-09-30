@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --primary: #04626C;
+  --primary-hover: #035259;
+  --primary-light: #06879A;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --font-heading: var(--font-pixelify-sans);
+  --font-body: var(--font-roboto-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), monospace;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100vw;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-pixelify-sans), sans-serif;
+}
+
+.font-heading {
+  font-family: var(--font-pixelify-sans), sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-roboto-mono), monospace;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Flip-dot animation enhancement - simulates mechanical flip */
+@keyframes flip {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes flip-preview {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: scale(1.08);
+    filter: brightness(1.3);
+  }
+  75% {
+    transform: scale(0.95);
+    filter: brightness(0.8);
+  }
+}
+
+.animate-flip-preview {
+  animation: flip-preview 0.6s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.35) !important;
+}
