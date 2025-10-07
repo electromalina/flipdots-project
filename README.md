@@ -1,117 +1,145 @@
-# Node Flipdots
+# 84x28 Raycaster Gallery
 
-A Node.js project for controlling and simulating flipdot displays, perfect for educational purposes and creative coding exercises.
+A modular raycaster engine built with vanilla JavaScript, featuring interactive gallery paintings and a clean, maintainable architecture.
 
-## Overview
+## 🚀 Features
 
-This project provides a framework for generating animations for flipdot displays, which are electromechanical displays consisting of small discs (dots) that can be flipped to show different colors (typically black or white). The application:
+- **84x28 raycaster engine** with smooth wall rendering
+- **6 interactive gallery paintings** that open URLs when viewed closely
+- **Collision detection** with smooth player movement
+- **Development minimap** showing player position and paintings
+- **Three.js hardware acceleration** with 2D canvas fallback
+- **Modular architecture** for easy maintenance and extension
 
-- Creates bitmap graphics on a virtual canvas
-- Processes these graphics for flipdot compatibility
-- Provides a real-time web preview
-- Outputs frames as PNG images
+## 📁 Project Structure
 
-## Installation
-
-Make sure you have [Node.js](https://nodejs.org/en) installed.
-
-Clone the repository and install dependencies:
-
-```bash
-git clone <repository-url>
-cd node-flipdots
-npm install
+```
+├── index.html          # Main HTML file with game loop
+├── js/
+│   ├── config.js       # Configuration constants
+│   ├── world.js        # Map data and collision detection
+│   ├── player.js       # Player state and input handling
+│   ├── gallery.js      # Gallery painting interactions
+│   └── engine.js       # Raycasting and rendering engine
+└── README.md          # This file
 ```
 
-## Running the Application
+## 🎮 Controls
 
-Start the development server with:
+- **WASD** or **Arrow Keys** - Move forward/backward, strafe left/right
+- **Q/E** or **Left/Right Arrows** - Turn left/right
+- **F** - Interact with floor items
+- **Gallery Paintings** - Walk close and look directly at them to trigger
 
-```bash
-npm run dev
-```
+## 🛠️ Architecture
 
-This runs the application with nodemon for automatic reloading when files are modified.
+### Modular Design
 
-Once running:
-1. Open your browser and navigate to `http://localhost:3000/view`
-2. You'll see the real-time preview of the flipdot display output
+The codebase is split into logical modules:
 
-## Project Structure
+- **`config.js`** - All game constants and configuration values
+- **`world.js`** - Map data, collision detection, and wall geometry
+- **`player.js`** - Player state, movement, and input handling
+- **`gallery.js`** - Interactive painting system
+- **`engine.js`** - Core raycasting and rendering engine
 
-- `src/index.js` - Main entry point that sets up the canvas, rendering loop, and example animations
-- `src/ticker.js` - Handles the timing mechanism (like requestAnimationFrame for Node.js)
-- `src/preview.js` - Creates a simple HTTP server for real-time preview in the browser
-- `src/settings.js` - Configuration for display resolution, panel layout, and framerate
-- `output/` - Directory containing generated PNG frames
+### Key Components
 
-## Settings and Configuration
+1. **Raycasting Engine** - DDA algorithm for fast wall detection
+2. **Performance Buffers** - Typed arrays for smooth rendering
+3. **Angle Caching** - Optimized trigonometry calculations
+4. **Wall Smoothing** - Multi-pass smoothing for cleaner edges
+5. **Depth Smoothing** - Temporal smoothing for visual stability
 
-The display settings can be modified in `src/settings.js`:
+## ⚡ Performance Features
+
+- **Pre-computed geometry** - Wall corners calculated at startup
+- **Cached trigonometry** - Sine/cosine values cached per frame
+- **Optimized ray casting** - Efficient DDA stepping algorithm
+- **Buffer reuse** - Typed arrays for performance-critical data
+- **Smart invalidation** - Only recalculate when needed
+
+## 🎨 Customization
+
+### Adding Gallery Paintings
+
+Edit `js/gallery.js` to add new paintings:
 
 ```javascript
-export const FPS = 15;                    // Frames per second
-export const PANEL_RESOLUTION = [28, 14]; // Size of each panel in dots
-export const PANEL_LAYOUT = [3, 2];       // Layout of panels (horizontal, vertical)
-export const RESOLUTION = [               // Total resolution calculation
-    PANEL_RESOLUTION[0] * PANEL_LAYOUT[0],
-    PANEL_RESOLUTION[1] * PANEL_LAYOUT[1],
+export const galleryFrames = [
+  { x: 11, y: 6, url: 'https://your-url.com' }, // Right wall
+  // Add more paintings here
 ];
 ```
 
-## Creating Your Own Animations
+### Modifying the Map
 
-The main rendering loop is in `src/index.js`. To create your own animations:
-
-1. Modify the callback function in the `ticker.start()` method
-2. Use the canvas 2D context (`ctx`) to draw your graphics
-3. The graphics are automatically converted to black and white for the flipdot display
-
-Example of drawing a simple animation:
+Edit the map array in `js/world.js`:
 
 ```javascript
-ticker.start(({ deltaTime, elapsedTime }) => {
-    // Clear the canvas
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, width, height);
-    
-    // Draw something (e.g., moving circle)
-    const x = Math.floor(((Math.sin(elapsedTime / 1000) + 1) / 2) * width);
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.arc(x, height/2, 5, 0, Math.PI * 2);
-    ctx.fill();
-});
+export const map = [
+  [1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,2,0,1],
+  // Modify map layout here
+  // 0 = walkable, 1 = wall, 2 = item1, 3 = item2
+];
 ```
 
-## Advanced Usage
+### Adjusting Game Settings
 
-### Binary Thresholding
-
-The application automatically converts all drawn graphics to pure black and white using thresholding:
+Modify constants in `js/config.js`:
 
 ```javascript
-// Any pixel with average RGB value > 127 becomes white, otherwise black
-const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-const binary = brightness > 127 ? 255 : 0;
+export const MOVE_SPEED = 2.2 / 15;        // Movement speed
+export const TRIGGER_DISTANCE = 1.0;       // Painting trigger distance
+export const FOV = Math.PI / 3;            // Field of view (60°)
 ```
 
-### Output
+## 🔧 Development
 
-The rendered frames are saved as PNG files in the `output` directory and can be accessed via the web preview or directly from the filesystem.
+### Running Locally
 
-## Project Extensions
+1. Start a local HTTP server (required for ES6 modules):
+   ```bash
+   # Python 3
+   python -m http.server 8000
+   
+   # Node.js
+   npx serve .
+   
+   # PHP
+   php -S localhost:8000
+   ```
 
-Some ideas to extend this project:
-- Add text scrolling animations
-- Implement Conway's Game of Life
-- Create a clock or countdown timer
-- Add socket.io for remote control
-- Create a library of animation effects
-- Build an API to control the display
+2. Open `http://localhost:8000` in your browser
 
-## Dependencies
+### Browser Compatibility
 
-- [`canvas`](https://www.npmjs.com/package/canvas) - For creating and manipulating graphics
-- [`nodemon`](https://www.npmjs.com/package/nodemon) - For development auto-reloading 
+- **Modern browsers** with ES6 module support
+- **Three.js** for hardware acceleration (optional)
+- **Canvas 2D** fallback for older browsers
+
+## 📊 Technical Details
+
+- **Resolution**: 84x28 pixels (scaled up for display)
+- **Target FPS**: 15 (for consistent retro feel)
+- **Ray casting**: DDA algorithm with 0.05 step size
+- **Rendering**: Offscreen buffer with post-processing
+- **Input**: Event-driven with anti-stuck mechanisms
+
+## 🎯 Future Enhancements
+
+- [ ] Texture mapping for walls
+- [ ] Animated sprites
+- [ ] Sound effects
+- [ ] Multiple levels
+- [ ] Save/load system
+- [ ] Mobile touch controls
+
+## 📄 License
+
+Open source - feel free to modify and extend!
+
+---
+
+
