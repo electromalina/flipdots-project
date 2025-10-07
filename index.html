@@ -67,7 +67,7 @@
     <canvas id="v" width="84" height="28"></canvas>
     <canvas id="post" width="84" height="28"></canvas>
   </div>
-  <canvas id="mini" width="220" height="100" title="Minimap (dev)"></canvas>
+  <canvas id="mini" width="220" height="100" title="Minimap (dev)" style="display:none"></canvas>
   
   <div class="loading" id="loading">Loading...</div>
 
@@ -158,8 +158,21 @@
       // Render 3D scene
       render();
       
-      // Render development minimap
+      // Render development minimap (hidden on game screen but used for controller stream)
       renderMinimap();
+
+      // Throttle and emit minimap frame to controller (~16 FPS)
+      if (!window.__lastMiniSentTs) window.__lastMiniSentTs = 0;
+      const nowMs = now;
+      if (nowMs - window.__lastMiniSentTs > 60) {
+        try {
+          const dataUrl = mini.toDataURL('image/webp', 0.9);
+          socket.emit('minimap_frame', dataUrl);
+          window.__lastMiniSentTs = nowMs;
+        } catch (e) {
+          // ignore encoding errors
+        }
+      }
       
       // Schedule next frame
       requestAnimationFrame(gameLoop);
