@@ -97,6 +97,10 @@ switch ($path) {
         handleTrigger();
         break;
         
+    case '/current':
+        showCurrent();
+        break;
+        
     default:
         header('Content-Type: application/json');
         http_response_code(404);
@@ -393,6 +397,16 @@ function showUploads() {
         'total' => count($uploads),
         'uploads' => $uploads
     ], JSON_PRETTY_PRINT);
+}
+
+function showCurrent() {
+    header('Content-Type: application/json');
+    $file = 'current.json';
+    if (file_exists($file)) {
+        echo file_get_contents($file);
+        return;
+    }
+    echo json_encode(['message' => 'No current selection yet']);
 }
 
 function getUploads() {
