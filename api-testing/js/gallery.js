@@ -12,7 +12,7 @@ import {
   LOOK_PRECISION 
 } from './config.js';
 import { getPlayerPosition } from './player.js';
-import { handlePaintingClick } from '../flipboard-simple.js';
+import { handlePaintingClick } from '../flipboard-working.js';
 
 // =============================================================================
 // GALLERY PAINTINGS CONFIGURATION
