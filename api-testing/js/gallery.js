@@ -310,14 +310,16 @@ async function triggerRepoDownload(githubUrl) {
         body: JSON.stringify({ url: githubUrl })
       });
       const json = await res.json().catch(() => ({}));
+      console.log(`📡 Response from ${ep}:`, { status: res.status, ok: res.ok, json });
+      
       if (res.ok && json && json.success) {
         console.log('✅ Download started:', json);
         // Optional: simple user feedback
         alert('Repo download started on flipboard: ' + (json.target_dir || ''));
         return true;
       }
-      console.warn('Endpoint responded but not success:', json);
-      lastError = json;
+      console.warn('Endpoint responded but not success:', { status: res.status, json });
+      lastError = { status: res.status, json, endpoint: ep };
     } catch (err) {
       console.warn(`Endpoint ${ep} failed:`, err.message);
       lastError = err;
