@@ -1,25 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- 
+    =============================================================================
+    FLIPBOARD UPLOAD DASHBOARD
+    =============================================================================
+    
+    This dashboard displays GitHub repositories uploaded via Slack slash commands.
+    Features:
+    - Black and white flipboard aesthetic with dot matrix effects
+    - Real-time upload display from PHP API backend
+    - Interactive buttons to run/view GitHub repositories
+    - 3D gallery room integration
+    - Responsive design with monospace fonts
+    
+    API Endpoints:
+    - /uploads - Get list of uploaded repositories
+    - /dashboard - This HTML page
+    
+    Author: Flipboard Project Team
+    Last Updated: 2024
+    =============================================================================
+    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎮 Flipboard Upload Dashboard</title>
     <style>
+        /* =============================================================================
+           GLOBAL STYLES - FLIPBOARD THEME
+           ============================================================================= */
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Main body styling with flipboard aesthetic */
         body {
-            font-family: 'Courier New', monospace;
-            background: #000;
-            min-height: 100vh;
-            color: #fff;
-            position: relative;
+            font-family: 'Courier New', monospace;  /* Monospace for digital display look */
+            background: #000;                       /* Pure black background */
+            min-height: 100vh;                     /* Full viewport height */
+            color: #fff;                           /* White text */
+            position: relative;                    /* For overlay effects */
         }
         
-        /* Flipboard dot matrix effect */
+        /* Flipboard dot matrix effect - creates vintage computer screen look */
         body::before {
             content: '';
             position: fixed;
@@ -27,18 +53,20 @@
             left: 0;
             width: 100%;
             height: 100%;
+            /* Dot matrix pattern for vintage computer screen effect */
             background-image: 
                 radial-gradient(circle at center, #222 1px, transparent 1px);
-            background-size: 12px 12px;
-            opacity: 0.3;
-            pointer-events: none;
-            z-index: -1;
+            background-size: 12px 12px;              /* Dot spacing */
+            opacity: 0.3;                            /* Subtle overlay */
+            pointer-events: none;                    /* Don't interfere with clicks */
+            z-index: -1;                             /* Behind all content */
         }
 
+        /* Main container for responsive layout */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1200px;                       /* Maximum width for large screens */
+            margin: 0 auto;                          /* Center horizontally */
+            padding: 20px;                           /* Internal spacing */
         }
 
         .header {
@@ -684,9 +712,35 @@
     </button>
 
     <script>
-        // Set current date and test functions
+        /* =============================================================================
+           FLIPBOARD DASHBOARD JAVASCRIPT
+           =============================================================================
+           
+           This script handles:
+           - Loading and displaying GitHub repository uploads from the API
+           - Converting GitHub URLs to runnable web previews
+           - Managing interactive buttons for repository actions
+           - Auto-refreshing upload data every 30 seconds
+           - Error handling and debugging functionality
+           
+           API Integration:
+           - Fetches data from /uploads endpoint
+           - Handles JSON response parsing
+           - Manages loading states and error conditions
+           
+           Repository Processing:
+           - Converts GitHub URLs to various web preview services
+           - Tries multiple services for maximum compatibility
+           - Handles different repository types (HTML, React, etc.)
+           =============================================================================
+        */
+        
+        // Initialize dashboard when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            // Set current date in header
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+            
+            // Debug logging for function availability
             console.log('DOM loaded, testing functions...');
             console.log('showIndividualButtons function exists:', typeof showIndividualButtons);
         });
@@ -723,8 +777,15 @@
         }
 
         // Load uploads function - SIMPLIFIED VERSION
+        /**
+         * Main function to load and display GitHub repository uploads
+         * Fetches data from the PHP API backend and renders upload cards
+         * Handles loading states, errors, and empty data scenarios
+         */
         async function loadUploads() {
             console.log('=== LOADING UPLOADS START ===');
+            
+            // Get the container element where uploads will be displayed
             const container = document.getElementById('uploadsContainer');
             
             if (!container) {
@@ -733,19 +794,24 @@
             }
             
             try {
+                // Show loading state to user
                 container.innerHTML = '<div class="loading">Loading uploads...</div>';
                 console.log('Container updated, fetching data...');
                 
+                // API endpoint for fetching upload data
                 const apiUrl = 'https://i558110.hera.fontysict.net/api-testing/uploads';
                 console.log('API URL:', apiUrl);
                 
+                // Fetch data from PHP backend
                 const response = await fetch(apiUrl);
                 console.log('Response received:', response.status);
                 
+                // Check if request was successful
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
+                // Parse JSON response
                 const data = await response.json();
                 console.log('Data received:', data);
                 

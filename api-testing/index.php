@@ -1,27 +1,62 @@
 <?php
-// Enable CORS if needed
+/**
+ * =============================================================================
+ * FLIPBOARD SLACK API BACKEND
+ * =============================================================================
+ * 
+ * This PHP backend handles Slack slash command integration and provides
+ * API endpoints for the Flipboard dashboard and 3D gallery room.
+ * 
+ * Features:
+ * - Slack slash command processing (/upload-flipboard)
+ * - GitHub repository validation and storage
+ * - RESTful API endpoints for dashboard and gallery
+ * - CORS support for cross-origin requests
+ * - JSON data storage for upload history
+ * 
+ * API Endpoints:
+ * - POST /slack/events - Slack slash command handler
+ * - GET /uploads - Get list of uploaded repositories
+ * - GET /dashboard - Dashboard HTML page
+ * - GET / - Health check endpoint
+ * 
+ * Data Storage:
+ * - uploads.json - Stores last 6 uploaded repositories
+ * - JSON format with metadata (timestamp, user, repository info)
+ * 
+ * Author: Flipboard Project Team
+ * Last Updated: 2024
+ * =============================================================================
+ */
+
+// Enable CORS for cross-origin requests (needed for dashboard/gallery)
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Handle preflight requests
+// Handle preflight OPTIONS requests (required for CORS)
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// Get the request path
+// =============================================================================
+// REQUEST ROUTING
+// =============================================================================
+
+// Parse the incoming request URL to determine which endpoint to handle
 $request = $_SERVER['REQUEST_URI'];
 $path = parse_url($request, PHP_URL_PATH);
 
-// Remove the base path if it exists
+// Remove the base path if it exists (for subdirectory deployments)
 $basePath = '/api-testing';
 if (strpos($path, $basePath) === 0) {
     $path = substr($path, strlen($basePath));
 }
 
-// Route handling
+// Route handling - dispatch requests to appropriate handlers
 switch ($path) {
+    // Health check endpoint - returns server status
     case '/':
     case '/index.php':
         header('Content-Type: application/json');

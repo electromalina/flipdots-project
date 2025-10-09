@@ -1,44 +1,60 @@
 /**
- * Configuration and Constants
- * Central location for all game configuration values
+ * =============================================================================
+ * FLIPBOARD 3D GALLERY - CONFIGURATION AND CONSTANTS
+ * =============================================================================
+ * 
+ * This file contains all configuration values for the 3D raycaster gallery.
+ * Centralized configuration makes it easy to adjust game behavior, performance,
+ * and visual settings without hunting through multiple files.
+ * 
+ * Key Areas:
+ * - Gameplay constants (movement, interaction, timing)
+ * - Rendering settings (FPS, smoothing, dimensions)
+ * - Raycasting parameters (step size, max distance)
+ * - Canvas dimensions and scaling
+ * - Player spawn position and minimap settings
+ * 
+ * Author: Flipboard Project Team
+ * Last Updated: 2024
+ * =============================================================================
  */
 
 // =============================================================================
 // GAMEPLAY CONSTANTS
 // =============================================================================
 
-/** Distance threshold for triggering gallery paintings */
+/** Distance threshold for triggering gallery paintings (in world units) */
 export const TRIGGER_DISTANCE = 1.0;
 
-/** Cooldown time between gallery triggers (milliseconds) */
+/** Cooldown time between gallery triggers to prevent spam (milliseconds) */
 export const TRIGGER_COOLDOWN = 2000;
 
-/** Precision threshold for looking at paintings (radians) */
+/** Precision threshold for looking at paintings (radians) - how accurate you need to aim */
 export const LOOK_PRECISION = 0.05;
 
-/** Player movement speed (units per frame at 15fps) */
+/** Player movement speed (units per frame at 15fps) - calibrated for smooth movement */
 export const MOVE_SPEED = 2.2 / 15;
 
-/** Player rotation speed (radians per frame at 15fps) */
+/** Player rotation speed (radians per frame at 15fps) - how fast you can turn */
 export const ROTATION_SPEED = 1.8 / 15;
 
-/** Field of view in radians (60 degrees) */
+/** Field of view in radians (60 degrees) - how wide your view is */
 export const FOV = Math.PI / 3;
 
 // =============================================================================
 // RENDERING CONSTANTS
 // =============================================================================
 
-/** Smoothing factor for depth and size buffers (0-1) */
+/** Smoothing factor for depth and size buffers (0-1) - higher = smoother but less responsive */
 export const SMOOTH_FACTOR = 0.7;
 
-/** Width of pillar rendering in pixels */
+/** Width of pillar rendering in pixels - affects wall thickness in 3D view */
 export const PILLAR_THICKNESS = 2;
 
-/** Width of gallery frame rendering in pixels */
+/** Width of gallery frame rendering in pixels - affects painting frame thickness */
 export const FRAME_THICKNESS = 3;
 
-/** Target frame rate for consistent gameplay */
+/** Target frame rate for consistent gameplay - lower FPS for retro feel */
 export const TARGET_FPS = 15;
 
 // =============================================================================

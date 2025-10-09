@@ -1,30 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- 
+  =============================================================================
+  FLIPBOARD 3D GALLERY ROOM
+  =============================================================================
+  
+  This is a 3D raycaster-based gallery room that displays GitHub repositories
+  uploaded via Slack as interactive "paintings" on the walls.
+  
+  Features:
+  - 3D raycaster engine with custom Doom-style rendering
+  - Interactive paintings that open GitHub repository links
+  - Black and white flipboard aesthetic with pixelated graphics
+  - Real-time data loading from PHP API backend
+  - WASD movement controls and mouse look
+  - Minimap display for navigation
+  
+  Technical Details:
+  - Uses HTML5 Canvas for 3D rendering
+  - Modular JavaScript architecture (config.js, engine.js, player.js, etc.)
+  - Fetches upload data from /uploads API endpoint
+  - Converts GitHub URLs to clickable paintings
+  
+  Controls:
+  - WASD: Move around the room
+  - Mouse: Look around
+  - Click paintings: Open GitHub repository in new tab
+  
+  Author: Flipboard Project Team
+  Last Updated: 2024
+  =============================================================================
+  -->
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <style>
-    /* Main game display container */
+    /* =============================================================================
+       FLIPBOARD 3D GALLERY STYLES
+       ============================================================================= */
+    
+    /* Main game display container - holds both canvas layers */
     .stage { 
       position: relative; 
       width: 840px; 
       height: 280px; 
-      border: 2px solid #333;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 2px solid #333;                    /* Flipboard-style border */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);   /* Subtle depth effect */
     }
     
     /* Primary raycaster canvas - scaled 10x for visibility */
+    /* This canvas renders the 3D world view */
     #v { 
-      image-rendering: pixelated; 
+      image-rendering: pixelated;                /* Pixelated rendering for retro look */
       width: 840px; 
       height: 280px; 
-      background: #000; 
+      background: #000;                          /* Black background */
       display: block; 
     }
     
-    /* Overlay canvas for UI elements (pillars, frames) */
+    /* Overlay canvas for UI elements (pillars, frames, paintings) */
+    /* This canvas renders interactive elements on top of the 3D view */
     #post { 
-      image-rendering: pixelated; 
+      image-rendering: pixelated;                /* Pixelated rendering for consistency */
       width: 840px; 
       height: 280px; 
       position: absolute; 
