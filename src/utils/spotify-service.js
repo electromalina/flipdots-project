@@ -45,6 +45,13 @@ export class SpotifyService {
             redirectUri: config.redirectUri
         });
         
+        // Auth status cache
+        this.authStatusCache = {
+            isValid: false,
+            lastCheck: 0,
+            cacheDuration: 30000 // Cache for 30 seconds
+        };
+        
         // Load saved tokens if they exist
         this.loadTokens();
         console.log('Spotify service initialized');
@@ -59,8 +66,10 @@ export class SpotifyService {
                 this.spotifyApi.setRefreshToken(tokens.refreshToken);
                 console.log('Loaded saved Spotify tokens');
                 
-                // Set up automatic token refresh
-                this.spotifyApi.setRefreshToken(tokens.refreshToken);
+                // Optimistically assume loaded tokens are valid
+                // Will be verified on first isAuthenticated() call
+                this.authStatusCache.isValid = true;
+                this.authStatusCache.lastCheck = Date.now();
             }
         } catch (error) {
             console.log('No saved Spotify tokens found');
@@ -73,29 +82,87 @@ export class SpotifyService {
             const tokens = { accessToken, refreshToken };
             fs.writeFileSync(tokenPath, JSON.stringify(tokens, null, 2));
             console.log('Saved Spotify tokens');
+            
+            // Update auth cache - new tokens are valid
+            this.authStatusCache.isValid = true;
+            this.authStatusCache.lastCheck = Date.now();
         } catch (error) {
             console.error('Failed to save Spotify tokens:', error);
         }
     }
 
-    async isAuthenticated() {
+    async refreshAccessToken() {
         try {
-            // Check if we have an access token
+            console.log('Refreshing access token...');
+            const data = await this.spotifyApi.refreshAccessToken();
+            const newAccessToken = data.body['access_token'];
+            
+            // Update tokens
+            this.spotifyApi.setAccessToken(newAccessToken);
+            
+            // Save new access token (keep existing refresh token)
+            const currentRefreshToken = this.spotifyApi.getRefreshToken();
+            this.saveTokens(newAccessToken, currentRefreshToken);
+            
+            console.log('Access token refreshed successfully');
+            return true;
+        } catch (error) {
+            console.error('Failed to refresh access token:', error);
+            return false;
+        }
+    }
+
+    async isAuthenticated(skipCache = false) {
+        // Check cache first (unless explicitly skipped)
+        const now = Date.now();
+        if (!skipCache && (now - this.authStatusCache.lastCheck) < this.authStatusCache.cacheDuration) {
+            return this.authStatusCache.isValid;
+        }
+        
+        try {
+            // Quick check: do we even have a token?
             const accessToken = this.spotifyApi.getAccessToken();
             if (!accessToken) {
+                this.authStatusCache.isValid = false;
+                this.authStatusCache.lastCheck = now;
                 return false;
             }
 
-            // Try to make a simple API call to verify the token is valid
+            // Verify token is valid with lightweight API call
             await this.spotifyApi.getMe();
+            
+            // Cache the positive result
+            this.authStatusCache.isValid = true;
+            this.authStatusCache.lastCheck = now;
             return true;
         } catch (error) {
             if (error.statusCode === 401) {
-                console.log('Spotify token is expired or invalid');
+                console.log('Access token expired, attempting refresh...');
+                
+                // Try to refresh the token
+                const refreshed = await this.refreshAccessToken();
+                
+                if (refreshed) {
+                    this.authStatusCache.isValid = true;
+                    this.authStatusCache.lastCheck = now;
+                    return true; // Successfully refreshed
+                }
+                
+                console.log('Token refresh failed, re-authentication required');
+                this.authStatusCache.isValid = false;
+                this.authStatusCache.lastCheck = now;
                 return false;
             }
-            // For other errors, assume we're authenticated but there's a temporary issue
+            
+            // For network errors, use cached value if available
+            if (this.authStatusCache.isValid && (now - this.authStatusCache.lastCheck) < 300000) {
+                console.log('Using cached auth status due to network error');
+                return this.authStatusCache.isValid;
+            }
+            
             console.error('Error checking authentication:', error.message);
+            this.authStatusCache.isValid = false;
+            this.authStatusCache.lastCheck = now;
             return false;
         }
     }
@@ -120,11 +187,18 @@ export class SpotifyService {
             };
         } catch (error) {
             if (error.statusCode === 401) {
-                console.log('Spotify token expired, please re-authenticate at http://127.0.0.1:3000/auth/login');
+                console.log('Access token expired, attempting refresh...');
+                const refreshed = await this.refreshAccessToken();
+                
+                if (refreshed) {
+                    // Retry the request with new token
+                    return await this.getCurrentTrack();
+                }
+                
+                console.log('Token refresh failed, please re-authenticate at http://127.0.0.1:3000');
                 return null;
             }
             console.error('Error getting current track:', error.message || error);
-            console.error('Full error details:', JSON.stringify(error, null, 2));
             return null;
         }
     }
@@ -158,8 +232,11 @@ export class SpotifyService {
             await this.spotifyApi.skipToNext();
             console.log('Skipped to next track');
         } catch (error) {
+            if (error.statusCode === 401) {
+                const refreshed = await this.refreshAccessToken();
+                if (refreshed) return await this.nextTrack();
+            }
             console.error('Error skipping to next track:', error.message || error);
-            console.error('Full next track error details:', JSON.stringify(error, null, 2));
         }
     }
 
@@ -168,8 +245,11 @@ export class SpotifyService {
             await this.spotifyApi.skipToPrevious();
             console.log('Skipped to previous track');
         } catch (error) {
+            if (error.statusCode === 401) {
+                const refreshed = await this.refreshAccessToken();
+                if (refreshed) return await this.previousTrack();
+            }
             console.error('Error skipping to previous track:', error.message || error);
-            console.error('Full previous track error details:', JSON.stringify(error, null, 2));
         }
     }
 
@@ -185,8 +265,11 @@ export class SpotifyService {
                 console.log('Resumed playback');
             }
         } catch (error) {
+            if (error.statusCode === 401) {
+                const refreshed = await this.refreshAccessToken();
+                if (refreshed) return await this.togglePlayback();
+            }
             console.error('Error toggling playback:', error.message || error);
-            console.error('Full toggle error details:', JSON.stringify(error, null, 2));
         }
     }
 

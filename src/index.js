@@ -1,22 +1,29 @@
 import { Ticker } from "./ticker.js";
-import { createCanvas, registerFont } from "canvas";
+import { createCanvas, registerFont, ImageData } from "canvas";
 import fs from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
+import { Worker } from "worker_threads";
 
-// Load environment variables first, before any other imports
+// Load environment variables
 dotenv.config();
 
 import { FPS, LAYOUT } from "./settings.js";
 import { Display } from "@owowagency/flipdot-emu";
 import { setButtonHandler, setSpotifyService } from "./preview.js";
-import { ditherCanvas } from "./utils/dithering.js";
 import { createBackAnimation, createPlayPauseAnimation, createForwardAnimation } from "./animations.js";
 import { SpotifyService } from "./utils/spotify-service.js";
 import { APP_CONFIG } from "./config/app-config.js";
-
+import { StateManager } from "./state-manager.js";
+import { renderTrackInfo } from "./renderers/track-renderer.js";
+import { renderAnimation } from "./renderers/animation-renderer.js";
+import { renderIdleState } from "./renderers/idle-renderer.js";
 
 const IS_DEV = APP_CONFIG.dev.isDev;
+const DEBUG = process.env.DEBUG === 'true';
+
+// Initialize state manager
+const state = new StateManager();
 
 // Initialize music service
 const musicService = new SpotifyService(APP_CONFIG.musicService.spotify);
@@ -45,319 +52,153 @@ if (!fs.existsSync(outputDir)) {
 	fs.mkdirSync(outputDir, { recursive: true });
 }
 
-// Register fonts
-
+// Register fonts (once at startup)
 registerFont(path.resolve(import.meta.dirname, "../fonts/cg-pixel-4x5.ttf"), {
 	family: "cg-pixel-4x5",
 });
 
-registerFont(
-	path.resolve(import.meta.dirname, "../fonts/OpenSans-Variable.ttf"),
-	{ family: "OpenSans" },
-);
-registerFont(
-	path.resolve(import.meta.dirname, "../fonts/PPNeueMontrealMono-Regular.ttf"),
-	{ family: "PPNeueMontreal" },
-);
-registerFont(path.resolve(import.meta.dirname, "../fonts/Px437_ACM_VGA.ttf"), {
-	family: "Px437_ACM_VGA",
-});
-
-// Create canvas with the specified resolution
+// Create canvas
 const canvas = createCanvas(width, height);
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 ctx.textBaseline = "top";
 
-// Track state
-let currentTrackData = null;
-let albumArtCanvas = null;
+// Initialize dithering worker
+const ditheringWorker = new Worker(
+	path.resolve(import.meta.dirname, './workers/dithering-worker.js'),
+	{ type: 'module' }
+);
 
-// Animation state
-let currentAnimation = null;
-let animationFrames = [];
-let animationFrameIndex = 0;
-let animationPlaying = false;
-let animationStartTime = 0;
+// Double buffering for dithering
+let pendingDither = false;
+let lastDitheredData = null;
 
-// Track update throttling
-let lastTrackUpdateTime = 0;
-const TRACK_UPDATE_INTERVAL = 1000; // Update every 1 second instead of every frame
-
-// Track previous state to detect external changes
-let previousTrackName = null;
-let previousIsPlaying = null;
-let localButtonPressedTime = 0; // Timestamp of last button press
-const BUTTON_COOLDOWN = 3000; // Ignore external changes for 3 seconds after button press
-
-// Track change waiting state
-let waitingForTrackChange = false; // True when we've pressed next/back and waiting for new track
-let waitingForTrackStartTime = 0; // When we started waiting
-const TRACK_CHANGE_TIMEOUT = 5000; // Give up waiting after 5 seconds
-
-// Text scrolling state
-let scrollEnabled = true; // Toggle for scrolling
-let scrollOffsetTrack = 0; // Scroll position for track name
-let scrollOffsetArtist = 0; // Scroll position for artist name
-let scrollSpeed = 0.67; // Pixels per frame (about 10 pixels/sec at 15fps)
-let scrollPauseFrames = 20; // Pause at loop (1.3 seconds at 15fps)
-let scrollPauseCounterTrack = 0; // Separate pause counter for track
-let scrollPauseCounterArtist = 0; // Separate pause counter for artist
-
-// Helper: word wrap and draw text
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-	// Handle undefined or null text
-	if (!text || typeof text !== 'string') {
-		return y;
+ditheringWorker.on('message', ({ success, data }) => {
+	if (success && data) {
+		lastDitheredData = new Uint8ClampedArray(data);
 	}
-	
-	const words = text.split(' ');
-	let line = '';
-	let linesUsed = 0;
-	for (let i = 0; i < words.length; i++) {
-		const testLine = line + words[i] + ' ';
-		const metrics = ctx.measureText(testLine);
-		if (metrics.width > maxWidth && i > 0) {
-			ctx.fillText(line, x, y);
-			line = words[i] + ' ';
-			y += lineHeight;
-			linesUsed++;
-			if (linesUsed >= maxLines - 1) {
-				line = line.substring(0, line.length - 1) + '...';
-				break;
-			}
-		} else {
-			line = testLine;
-		}
-	}
-	ctx.fillText(line, x, y);
-	linesUsed++;
-	return y + lineHeight;
-}
+	pendingDither = false;
+});
 
-// Function to draw scrolling text (marquee style)
-function drawScrollingText(ctx, text, x, y, maxWidth, lineHeight) {
-	if (!text || typeof text !== 'string') {
-		return y;
-	}
+// Function to request dithering in background
+function requestDithering(imageData) {
+	if (pendingDither) return; // Skip if worker is busy
 	
-	const metrics = ctx.measureText(text);
-	const textWidth = metrics.width;
-	
-	// If text fits, no need to scroll
-	if (textWidth <= maxWidth) {
-		ctx.fillText(text, x, y);
-		return y + lineHeight;
-	}
-	
-	// Text needs scrolling - return data for rendering
-	const padding = maxWidth * 0.3; // 30% of width as spacing
-	const totalTrackWidth = textWidth + padding;
-	
-	return { 
-		needsScroll: true, 
-		text, 
-		x, 
-		y, 
-		maxWidth, 
-		lineHeight,
-		textWidth,
-		totalTrackWidth
-	};
-}
-
-// Helper to render scrolling text with offset
-function renderScrollingText(ctx, scrollData, offset) {
-	const { text, x, y, maxWidth, textWidth, totalTrackWidth } = scrollData;
-	
-	// Normalize offset to loop seamlessly
-	const normalizedOffset = offset % totalTrackWidth;
-	
-	// CRITICAL: Round to whole pixels for flip dot - no anti-aliasing!
-	const pixelPerfectOffset = Math.floor(normalizedOffset);
-	
-	// Save context for clipping
-	ctx.save();
-	ctx.beginPath();
-	ctx.rect(x, y, maxWidth, scrollData.lineHeight);
-	ctx.clip();
-	
-	// Draw text at pixel-perfect position (integer coordinates only)
-	const drawX = Math.floor(x - pixelPerfectOffset);
-	ctx.fillText(text, drawX, y);
-	
-	// Draw second copy for seamless loop
-	if (pixelPerfectOffset > 0) {
-		ctx.fillText(text, drawX + Math.floor(totalTrackWidth), y);
-	}
-	
-	ctx.restore();
-	return y + scrollData.lineHeight;
-}
-
-// Function to draw truncated text (when scrolling is off)
-function drawTruncatedText(ctx, text, x, y, maxWidth, lineHeight) {
-	if (!text || typeof text !== 'string') {
-		return y;
-	}
-	
-	const metrics = ctx.measureText(text);
-	
-	if (metrics.width <= maxWidth) {
-		ctx.fillText(text, x, y);
-		return y + lineHeight;
-	}
-	
-	// Try to fit with ellipsis
-	let truncated = text;
-	while (truncated.length > 0 && ctx.measureText(truncated + '...').width > maxWidth) {
-		truncated = truncated.slice(0, -1);
-	}
-	
-	ctx.fillText(truncated + '...', x, y);
-	return y + lineHeight;
+	pendingDither = true;
+	ditheringWorker.postMessage({
+		imageData: imageData.data,
+		width,
+		height,
+		threshold: 128
+	});
 }
 
 // Function to update track data
-async function updateTrackData() {
+async function updateTrackData(forceUpdate = false) {
 	try {
 		const newTrackData = await musicService.getCurrentTrack();
 		
-		// Debug logging
 		if (newTrackData) {
-			console.log('Current track:', newTrackData.track, 'by', newTrackData.artist, 'isPlaying:', newTrackData.isPlaying);
+			if (DEBUG) {
+				console.log('Track:', newTrackData.track, 'by', newTrackData.artist);
+			}
 			
 			// Check if we got the new track we were waiting for
-			if (waitingForTrackChange) {
-				const trackChanged = newTrackData.track !== previousTrackName;
-				const waitTimeout = (Date.now() - waitingForTrackStartTime) > TRACK_CHANGE_TIMEOUT;
+			if (state.timings.waitingForTrackChange) {
+				const trackChanged = newTrackData.track !== state.track.previous.name;
+				const waitTimeout = (Date.now() - state.timings.waitingStartTime) > state.constants.TRACK_CHANGE_TIMEOUT;
 				
 				if (trackChanged || waitTimeout) {
-					console.log(trackChanged ? '✓ New track received!' : '⚠ Track change timeout');
-					waitingForTrackChange = false;
+					if (DEBUG) console.log(trackChanged ? '✓ New track' : '⚠ Timeout');
+					state.stopWaitingForTrackChange();
 				}
 			}
 			
-			// Check if enough time has passed since last button press
-			const timeSinceButtonPress = Date.now() - localButtonPressedTime;
-			const isExternalChange = timeSinceButtonPress > BUTTON_COOLDOWN;
-			
 			// Detect external changes (not from our buttons)
-			if (currentTrackData && isExternalChange && !waitingForTrackChange) {
-				// Detect track skip (forward or back)
-				if (newTrackData.track !== previousTrackName && previousTrackName !== null) {
-					console.log('External track change detected!');
+			if (state.track.current && state.isExternalChange() && !state.timings.waitingForTrackChange) {
+				// Detect track skip
+				if (newTrackData.track !== state.track.previous.name && state.track.previous.name !== null) {
+					if (DEBUG) console.log('External track change');
 					triggerAnimation('forward');
 				}
 				
-				// Detect play/pause toggle
-				if (newTrackData.isPlaying !== previousIsPlaying && previousIsPlaying !== null) {
-					console.log('External play/pause detected!');
-					triggerAnimation('playpause');
+				// Detect play/pause toggle - pass PREVIOUS state to show correct icon
+				// (animation shows the action taken, not the resulting state)
+				if (newTrackData.isPlaying !== state.track.previous.isPlaying && state.track.previous.isPlaying !== null) {
+					if (DEBUG) console.log('External play/pause', newTrackData.isPlaying ? 'pressed play' : 'pressed pause');
+					triggerAnimation('playpause', state.track.previous.isPlaying);
 				}
 			}
 			
-			// Store current state for next comparison
-			previousTrackName = newTrackData.track;
-			previousIsPlaying = newTrackData.isPlaying;
+			// Update state
+			state.updateTrack(newTrackData);
 			
-			// If we have new track data and it's different from current one
-			if (!currentTrackData || newTrackData.track !== currentTrackData.track) {
-				// Get album art with Atkinson dithering for better low-res
-				albumArtCanvas = await musicService.getAlbumArt(
-					newTrackData,
-					42,  // Use half display width or 28px max
-					height
-				);
+			// Fetch album art if track changed
+			if (!state.track.albumArt || newTrackData.track !== state.track.previous.name) {
+				const albumArt = await musicService.getAlbumArt(newTrackData, 28, height);
+				state.setAlbumArt(albumArt);
 			}
-			
-		currentTrackData = newTrackData;
-	} else {
-		console.log('No track data received');
-		// Don't clear currentTrackData on occasional failures to prevent flickering
-		// The display will continue showing the last known track until valid data returns
-	}
+		}
 	} catch (error) {
-		console.error('Failed to update track data:', error.message || error);
-		console.error('Full error details:', JSON.stringify(error, null, 2));
-		// Don't immediately clear currentTrackData on error to prevent flickering
+		if (DEBUG) console.error('Track update error:', error.message);
 	}
 }
 
 // Function to trigger button animations
-function triggerAnimation(type) {
-	animationPlaying = true;
-	animationStartTime = Date.now();
-	animationFrameIndex = 0;
-	
+function triggerAnimation(type, isPlaying = null) {
+	let frames;
 	switch(type) {
 		case 'back':
-			animationFrames = createBackAnimation(ctx, width, height);
-			currentAnimation = 'back';
+			frames = createBackAnimation(ctx, width, height);
 			break;
 		case 'playpause':
-			animationFrames = createPlayPauseAnimation(ctx, width, height, currentTrackData?.isPlaying || false);
-			currentAnimation = 'playpause';
+			// Use provided isPlaying state or fall back to current state
+			const playState = isPlaying !== null ? isPlaying : (state.track.current?.isPlaying || false);
+			frames = createPlayPauseAnimation(ctx, width, height, playState);
 			break;
 		case 'forward':
-			animationFrames = createForwardAnimation(ctx, width, height);
-			currentAnimation = 'forward';
+			frames = createForwardAnimation(ctx, width, height);
 			break;
+		default:
+			return;
 	}
 	
-	// Animation duration (in milliseconds) - faster for next/back
-	const animationDuration = type === 'back' || type === 'forward' 
-		? APP_CONFIG.animations.nextBackDuration 
+	state.startAnimation(type, frames);
+	
+	// Animation duration
+	const duration = (type === 'back' || type === 'forward')
+		? APP_CONFIG.animations.nextBackDuration
 		: APP_CONFIG.animations.playPauseDuration;
 	
-	// Stop animation after duration
-	setTimeout(() => {
-		animationPlaying = false;
-		currentAnimation = null;
-		animationFrames = [];
-	}, animationDuration);
+	setTimeout(() => state.stopAnimation(), duration);
 }
 
 // Function to handle button actions
 function handleButtonAction(action) {
-	// Record timestamp to prevent triggering animation twice
-	// (once from button, once from state change detection)
-	localButtonPressedTime = Date.now();
+	state.setButtonPressed();
 	
 	switch(action) {
 		case 'back':
-			// Go to previous track
-			console.log('Back button pressed');
+			if (DEBUG) console.log('Back pressed');
 			musicService.previousTrack();
 			triggerAnimation('back');
-			// Wait for track data to update before showing content
-			waitingForTrackChange = true;
-			waitingForTrackStartTime = Date.now();
+			state.startWaitingForTrackChange();
+			updateTrackData(true); // Force immediate update
 			break;
+			
 		case 'playpause':
-			// Toggle play/pause
-			console.log('Play/Pause button pressed');
+			if (DEBUG) console.log('Play/Pause pressed');
 			musicService.togglePlayback();
 			triggerAnimation('playpause');
-			// No need to wait for track change on play/pause
+			updateTrackData(true); // Force immediate update
 			break;
+			
 		case 'forward':
-			// Go to next track
-			console.log('Forward button pressed');
+			if (DEBUG) console.log('Forward pressed');
 			musicService.nextTrack();
 			triggerAnimation('forward');
-			// Wait for track data to update before showing content
-			waitingForTrackChange = true;
-			waitingForTrackStartTime = Date.now();
-			break;
-		case 'togglescroll':
-			// Toggle text scrolling (no animation needed)
-			scrollEnabled = !scrollEnabled;
-			console.log('Toggle scroll:', scrollEnabled ? 'ON' : 'OFF');
-			scrollOffsetTrack = 0;
-			scrollOffsetArtist = 0;
-			scrollPauseCounterTrack = scrollPauseFrames;
-			scrollPauseCounterArtist = scrollPauseFrames;
+			state.startWaitingForTrackChange();
+			updateTrackData(true); // Force immediate update
 			break;
 	}
 }
@@ -368,205 +209,72 @@ const ticker = new Ticker({ fps: FPS });
 // Update track data initially
 await updateTrackData();
 
+// Main render loop
 ticker.start(async ({ deltaTime, elapsedTime }) => {
-	// Update track data only once per second instead of every frame (throttled)
+	// Update track data (throttled unless forced)
 	const now = Date.now();
-	if (now - lastTrackUpdateTime >= TRACK_UPDATE_INTERVAL) {
+	if (state.shouldUpdateTrack(now)) {
 		await updateTrackData();
-		lastTrackUpdateTime = now;
+		state.markTrackUpdated(now);
 	}
 
-	console.clear();
-	console.time("Write frame");
-	console.log(`Rendering a ${width}x${height} canvas`);
-	console.log("View at http://localhost:3000/");
-
+	// Clear and fill background
 	ctx.clearRect(0, 0, width, height);
-
-	// Fill the canvas with a black background
 	ctx.fillStyle = "#000";
 	ctx.fillRect(0, 0, width, height);
 
-	// Check if we're playing a button animation OR waiting for track to change
-	if ((animationPlaying && animationFrames.length > 0) || waitingForTrackChange) {
-		// Play animation frames - faster for next/back animations
-		const frameRate = (currentAnimation === 'back' || currentAnimation === 'forward') 
-			? APP_CONFIG.animations.nextBackFrameRate 
-			: APP_CONFIG.animations.playPauseFrameRate;
-		const frameTime = 1000 / frameRate;
-		const elapsed = Date.now() - animationStartTime;
-		animationFrameIndex = Math.floor(elapsed / frameTime) % animationFrames.length;
-		
-		if (animationFrameIndex < animationFrames.length && animationFrames.length > 0) {
-			ctx.drawImage(animationFrames[animationFrameIndex], 0, 0);
-		} else if (waitingForTrackChange) {
-			// Loop the last animation frame while waiting for track change
-			const lastFrame = animationFrames[animationFrames.length - 1];
-			if (lastFrame) {
-				ctx.drawImage(lastFrame, 0, 0);
-			}
-		}
-	} else if (currentTrackData && currentTrackData.isPlaying) {
-		// Album art on left side - increase the size to 42x28
-		const albumSize = Math.min(42, height);
-		if (albumArtCanvas) {
-			ctx.drawImage(albumArtCanvas, 0, 0, albumSize, height);
-		}
-		const margin = 5; // 5px margin between album art and text
-		const albumWidth = albumSize;
-		const textX = albumWidth + margin;
-		const textAreaWidth = width - textX - 2; // 2px right margin
-		
-		// Fixed layout positions for consistent alignment
-		const trackY = 3; // Track name position from top
-		const artistY = 11; // Artist name position (track + line height + spacing)
-		const progressBarHeight = 3; // Reserve 3 pixels at bottom (1px bar + margins)
-		
-		ctx.fillStyle = "#fff";
-		ctx.font = '5px "cg-pixel-4x5"';
-		
-		// Song name - fixed position at top
-		let trackScrollData = null;
-		if (currentTrackData.track) {
-			if (scrollEnabled) {
-				const result = drawScrollingText(ctx, currentTrackData.track, textX, trackY, textAreaWidth, 6);
-				if (result.needsScroll) {
-					trackScrollData = result;
-					renderScrollingText(ctx, trackScrollData, scrollOffsetTrack);
-				} else {
-					// Text fits, just draw it
-					ctx.fillText(currentTrackData.track, textX, trackY);
-				}
-			} else {
-				drawTruncatedText(ctx, currentTrackData.track, textX, trackY, textAreaWidth, 6);
-			}
-		}
-		
-		// Artist name - fixed position below track
-		let artistScrollData = null;
-		if (currentTrackData.artist) {
-			ctx.font = '5px "cg-pixel-4x5"';
-			if (scrollEnabled) {
-				const result = drawScrollingText(ctx, currentTrackData.artist, textX, artistY, textAreaWidth, 6);
-				if (result.needsScroll) {
-					artistScrollData = result;
-					renderScrollingText(ctx, artistScrollData, scrollOffsetArtist);
-				} else {
-					// Text fits, just draw it
-					ctx.fillText(currentTrackData.artist, textX, artistY);
-				}
-			} else {
-				drawTruncatedText(ctx, currentTrackData.artist, textX, artistY, textAreaWidth, 6);
-			}
-		}
-		
-		// Update scroll offsets for next frame - smooth continuous scrolling
-		if (scrollEnabled && !animationPlaying) {
-			// Track scrolling with independent pause
-			if (trackScrollData && trackScrollData.needsScroll) {
-				if (scrollPauseCounterTrack > 0) {
-					// Paused at loop point
-					scrollPauseCounterTrack--;
-				} else {
-					// Scroll continuously
-					scrollOffsetTrack += scrollSpeed;
-					
-					// Reset with brief pause when loop completes
-					if (scrollOffsetTrack >= trackScrollData.totalTrackWidth) {
-						scrollOffsetTrack = 0;
-						scrollPauseCounterTrack = scrollPauseFrames;
-					}
-				}
-			}
-			
-			// Artist scrolling with independent pause
-			if (artistScrollData && artistScrollData.needsScroll) {
-				if (scrollPauseCounterArtist > 0) {
-					// Paused at loop point
-					scrollPauseCounterArtist--;
-				} else {
-					// Scroll continuously
-					scrollOffsetArtist += scrollSpeed;
-					
-					// Reset with brief pause when loop completes
-					if (scrollOffsetArtist >= artistScrollData.totalTrackWidth) {
-						scrollOffsetArtist = 0;
-						scrollPauseCounterArtist = scrollPauseFrames;
-					}
-				}
-			}
-		} else if (!scrollEnabled) {
-			// Reset scroll when disabled
-			scrollOffsetTrack = 0;
-			scrollOffsetArtist = 0;
-			scrollPauseCounterTrack = 0;
-			scrollPauseCounterArtist = 0;
-		}
-		// Progress bar - fixed at bottom, always same position
-		const barHeight = 1; // Single pixel bar
-		const barWidth = textAreaWidth;
-		const progress = currentTrackData.duration > 0 ? currentTrackData.progress / currentTrackData.duration : 0;
-		const progressY = height - progressBarHeight + 1; // Fixed position from bottom
-		
-		// Draw background bar
-		ctx.fillStyle = "#333";
-		ctx.fillRect(textX, progressY, barWidth, barHeight);
-		
-		// Draw progress
-		ctx.fillStyle = "#fff";
-		ctx.fillRect(textX, progressY, Math.floor(barWidth * progress), barHeight);
-	} else {
-		// Not playing message - only show if no track data at all OR if we have track data but it's explicitly paused
-		if (!currentTrackData || (currentTrackData && !currentTrackData.isPlaying)) {
-			ctx.fillStyle = "#fff";
-			ctx.font = '6px "cg-pixel-4x5"';
-			const noMusicMsg = currentTrackData ? "Paused" : "No music playing";
-			const textMetrics = ctx.measureText(noMusicMsg);
-			const textX = (width - textMetrics.width) / 2;
-			const textY = height / 2;
-			ctx.fillText(noMusicMsg, textX, textY);
-		} else {
-			// Show full-screen pause display with big centered pause icon
-			ctx.fillStyle = "#fff";
-			
-			// Center coordinates
-			const centerX = Math.floor(width / 2);
-			const centerY = Math.floor(height / 2);
-			
-			// Draw big pause icon in the center
-			const iconSize = Math.min(width, height) * 0.6; // 60% of the smaller dimension
-			const barWidth = Math.max(3, Math.floor(iconSize * 0.15)); // 15% of icon size, minimum 3px
-			const barHeight = Math.floor(iconSize);
-			const gap = Math.max(4, Math.floor(iconSize * 0.2)); // 20% of icon size, minimum 4px
-			
-			// Draw two vertical bars for pause icon
-			ctx.fillRect(centerX - gap/2 - barWidth, centerY - barHeight/2, barWidth, barHeight);
-			ctx.fillRect(centerX + gap/2, centerY - barHeight/2, barWidth, barHeight);
-		}
+	// Render based on current state
+	let rendered = false;
+	
+	// 1. Try to render animation (highest priority)
+	if (state.animation.playing || state.timings.waitingForTrackChange) {
+		rendered = renderAnimation(ctx, state);
+	}
+	
+	// 2. Render track info if playing
+	if (!rendered && state.track.current?.isPlaying) {
+		renderTrackInfo(ctx, state, width, height);
+		rendered = true;
+	}
+	
+	// 3. Render idle state
+	if (!rendered) {
+		renderIdleState(ctx, state.track.current, width, height);
 	}
 
-	// --- DITHERING STEP ---
-	// Use Floyd-Steinberg dithering for better low-res results
-	ditherCanvas(ctx, width, height);
+	// Get image data for dithering
+	const imageData = ctx.getImageData(0, 0, width, height);
+	
+	// Request background dithering
+	requestDithering(imageData);
+	
+	// Apply last dithered data if available, otherwise use current
+	const dataToUse = lastDitheredData || imageData.data;
+	const finalImageData = new ImageData(new Uint8ClampedArray(dataToUse), width, height);
 
+	// Output to display or file
 	if (IS_DEV) {
-		// Save the canvas as a PNG file
 		const filename = path.join(outputDir, "frame.png");
+		ctx.putImageData(finalImageData, 0, 0);
 		const buffer = canvas.toBuffer("image/png");
 		fs.writeFileSync(filename, buffer);
 	} else {
-		const imageData = ctx.getImageData(0, 0, display.width, display.height);
-		display.setImageData(imageData);
+		display.setImageData(finalImageData);
 		if (display.isDirty()) {
 			display.flush();
 		}
 	}
 
-	console.log(`Elapsed time: ${(elapsedTime / 1000).toFixed(2)}s`);
-	console.log(`Delta time: ${deltaTime.toFixed(2)}ms`);
-	console.timeEnd("Write frame");
+	if (DEBUG) {
+		console.log(`Frame time: ${deltaTime.toFixed(2)}ms | Dither: ${pendingDither ? 'busy' : 'ready'}`);
+	}
 });
 
 // Connect button handler and Spotify service to the preview server
 setButtonHandler(handleButtonAction);
 setSpotifyService(musicService);
+
+// Cleanup on exit
+process.on('exit', () => {
+	ditheringWorker.terminate();
+});

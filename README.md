@@ -1,117 +1,142 @@
-# Node Flipdots
+# Flipdot Spotify Display
 
-A Node.js project for controlling and simulating flipdot displays, perfect for educational purposes and creative coding exercises.
+A Node.js application that displays your current Spotify playback on a flipdot display with album art, scrolling text, and interactive animations.
 
-## Overview
 
-This project provides a framework for generating animations for flipdot displays, which are electromechanical displays consisting of small discs (dots) that can be flipped to show different colors (typically black or white). The application:
+## Features
 
-- Creates bitmap graphics on a virtual canvas
-- Processes these graphics for flipdot compatibility
-- Provides a real-time web preview
-- Outputs frames as PNG images
+- **Spotify Integration** - Real-time display of currently playing track
+- **Album Art Display** - Optimized dithering for 28x56 pixel display
+- **Smooth Text Scrolling** - Automatically scrolls long track/artist names
+- **Button Animations** - Visual feedback for play, pause, next, and back actions
+- **External Control Detection** - Animations trigger when controlling from Spotify app
+- **Auto Token Refresh** - Never needs re-authentication after initial login
+- **Live Web Preview** - Real-time preview at 8x scale with responsive design
+- **Background Dithering** - CPU-intensive image processing in worker thread
+
+## Display Specifications
+
+- **Resolution:** 84 × 56 pixels 
+- **Frame Rate:** 15 FPS
+- **Color Depth:** 1-bit (black and white)
 
 ## Installation
 
-Make sure you have [Node.js](https://nodejs.org/en) installed.
+### Prerequisites
 
-Clone the repository and install dependencies:
+- Node.js 18.x or higher
+- Spotify Developer Account
+- Spotify Premium (required for playback control API)
 
+### Setup
+
+1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd node-flipdots
+cd flipdots-project
 npm install
 ```
 
-## Running the Application
+2. **Configure Spotify API**
 
-Start the development server with:
+Create a `.env` file in the project root:
+```env
+SPOTIFY_CLIENT_ID=your_client_id_here
+SPOTIFY_CLIENT_SECRET=your_client_secret_here
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/auth/spotify/callback
+```
 
+To get your Spotify credentials:
+- Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+- Create a new app
+- Add `http://127.0.0.1:3000/auth/spotify/callback` to Redirect URIs
+- Copy your Client ID and Client Secret
+
+3. **Run the application**
+
+Development mode:
 ```bash
 npm run dev
 ```
 
-This runs the application with nodemon for automatic reloading when files are modified.
 
-Once running:
-1. Open your browser and navigate to `http://localhost:3000/view`
-2. You'll see the real-time preview of the flipdot display output
+## Usage
 
-## Project Structure
+### Web Interface
 
-- `src/index.js` - Main entry point that sets up the canvas, rendering loop, and example animations
-- `src/ticker.js` - Handles the timing mechanism (like requestAnimationFrame for Node.js)
-- `src/preview.js` - Creates a simple HTTP server for real-time preview in the browser
-- `src/settings.js` - Configuration for display resolution, panel layout, and framerate
-- `output/` - Directory containing generated PNG frames
+1. Open your browser and navigate to `http://localhost:3000`
+2. Click "Login to Spotify" to authenticate
+3. After login, the display will show your currently playing track
 
-## Settings and Configuration
+### Controls
 
-The display settings can be modified in `src/settings.js`:
+- ** Back** - Skip to previous track
+- ** Play/Pause** - Toggle playback
+- ** Forward** - Skip to next track
+
+Animations also trigger when you control playback from your Spotify app or other devices
+
+
+## Architecture
+
+The project follows a modular architecture for maintainability and performance:
+
+### Core Files
+
+- **`src/index.js`** - Main application entry point and render loop
+- **`src/state-manager.js`** - Centralized state management
+- **`src/ticker.js`** - Frame timing system (15 FPS)
+- **`src/preview.js`** - HTTP server for web preview and API
+- **`src/settings.js`** - Display configuration
+
+### Renderers
+
+- **`src/renderers/track-renderer.js`** - Track info, scrolling text, progress bar
+- **`src/renderers/animation-renderer.js`** - Button animation playback
+- **`src/renderers/idle-renderer.js`** - Idle/paused state display
+
+### Services & Utils
+
+- **`src/utils/spotify-service.js`** - Spotify API integration with auto-refresh
+- **`src/utils/dithering.js`** - Image processing algorithms
+- **`src/workers/dithering-worker.js`** - Background dithering worker thread
+- **`src/animations.js`** - Animation frame generators
+- **`src/config/app-config.js`** - Application configuration
+
+## Configuration
+
+### Display Settings (`src/settings.js`)
 
 ```javascript
-export const FPS = 15;                    // Frames per second
-export const PANEL_RESOLUTION = [28, 14]; // Size of each panel in dots
-export const PANEL_LAYOUT = [3, 2];       // Layout of panels (horizontal, vertical)
-export const RESOLUTION = [               // Total resolution calculation
-    PANEL_RESOLUTION[0] * PANEL_LAYOUT[0],
-    PANEL_RESOLUTION[1] * PANEL_LAYOUT[1],
+export const FPS = 15;  // Frame rate
+export const LAYOUT = [  // Panel arrangement
+  [3, 2, 1],
+  [4, 5, 6],
+  [9, 8, 7],
+  [10, 11, 12],
 ];
 ```
 
-## Creating Your Own Animations
 
-The main rendering loop is in `src/index.js`. To create your own animations:
 
-1. Modify the callback function in the `ticker.start()` method
-2. Use the canvas 2D context (`ctx`) to draw your graphics
-3. The graphics are automatically converted to black and white for the flipdot display
 
-Example of drawing a simple animation:
+Frames are saved to `output/frame.png` for flipdot output.
 
-```javascript
-ticker.start(({ deltaTime, elapsedTime }) => {
-    // Clear the canvas
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, width, height);
-    
-    // Draw something (e.g., moving circle)
-    const x = Math.floor(((Math.sin(elapsedTime / 1000) + 1) / 2) * width);
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.arc(x, height/2, 5, 0, Math.PI * 2);
-    ctx.fill();
-});
-```
 
-## Advanced Usage
 
-### Binary Thresholding
+## API Endpoints
 
-The application automatically converts all drawn graphics to pure black and white using thresholding:
+The built-in web server provides:
 
-```javascript
-// Any pixel with average RGB value > 127 becomes white, otherwise black
-const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-const binary = brightness > 127 ? 255 : 0;
-```
+- `GET /` - Main web interface with live preview
+- `GET /api/auth/status` - Check authentication status
+- `POST /api/auth/token` - Exchange authorization code for tokens
+- `POST /api/button/back` - Previous track
+- `POST /api/button/playpause` - Toggle playback
+- `POST /api/button/forward` - Next track
+- `GET /frame.png` - Current frame PNG
 
-### Output
 
-The rendered frames are saved as PNG files in the `output` directory and can be accessed via the web preview or directly from the filesystem.
+## Credits
 
-## Project Extensions
-
-Some ideas to extend this project:
-- Add text scrolling animations
-- Implement Conway's Game of Life
-- Create a clock or countdown timer
-- Add socket.io for remote control
-- Create a library of animation effects
-- Build an API to control the display
-
-## Dependencies
-
-- [`canvas`](https://www.npmjs.com/package/canvas) - For creating and manipulating graphics
-- [`nodemon`](https://www.npmjs.com/package/nodemon) - For development auto-reloading 
+Created by Danylo Kalynovskyi at Fontys University 2025
