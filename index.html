@@ -110,7 +110,7 @@
     // CONTROLLER SOCKET CONNECTION
     // =============================================================================
     // Connect to the controller server and forward events to player controls
-    const socket = io('http://localhost:4000', { transports: ['websocket', 'polling'] });
+    const socket = io(`http://${location.hostname}:4000`, { transports: ['websocket', 'polling'] });
     socket.on('connect', () => console.log('🕹️ Controller connected:', socket.id));
     socket.on('disconnect', () => console.log('🕹️ Controller disconnected'));
     socket.on('move', dir => remoteMove(dir));
