@@ -1,0 +1,84 @@
+{
+  "nowMs": 51148.9821,
+  "dt": 0.06666710000042803,
+  "fps": 14.999970000060213,
+  "spinActive": false,
+  "chainIndex": 3,
+  "chainCountdownMs": -416.6748333322612,
+  "reels": [
+    {
+      "i": 0,
+      "spinning": false,
+      "decel": false,
+      "snap": false,
+      "speed": 0,
+      "offset": 0
+    },
+    {
+      "i": 1,
+      "spinning": false,
+      "decel": false,
+      "snap": false,
+      "speed": 0,
+      "offset": 0
+    },
+    {
+      "i": 2,
+      "spinning": false,
+      "decel": false,
+      "snap": false,
+      "speed": 0,
+      "offset": 0
+    }
+  ],
+  "grid": [
+    [
+      "smalldot",
+      "bigdot",
+      "minus"
+    ],
+    [
+      "plus",
+      "plus",
+      "bigdot"
+    ],
+    [
+      "minus",
+      "smalldot",
+      "bigdot"
+    ],
+    [
+      "minus",
+      "minus",
+      "minus"
+    ]
+  ],
+  "wins": [
+    [
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ]
+    ]
+  ],
+  "eventsTail": [
+    "[24.349] reel0: decel",
+    "[24.482] reel0: snap armed",
+    "[24.749] reel0: stop (shifts=1)",
+    "[25.016] reel1: decel",
+    "[25.149] reel1: snap armed",
+    "[25.349] reel1: stop (shifts=1)",
+    "[25.616] reel2: decel",
+    "[25.749] reel2: snap armed",
+    "[26.016] reel2: stop (shifts=1)",
+    "[26.082] spin: all stopped, wins=1"
+  ]
+}

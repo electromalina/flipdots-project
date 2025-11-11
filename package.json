@@ -4,7 +4,7 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"dev": "nodemon src/index.js --dev",
+		"dev": "nodemon --watch src --ext js,mjs src/index.js --dev",
 		"start": "node src/index.js"
 	},
 	"author": "Stef van Wijchen (OWOW)",
