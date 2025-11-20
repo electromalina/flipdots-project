@@ -11,6 +11,7 @@ export default function Navigation() {
     { href: "#features", label: "Features" },
     { href: "#about", label: "About" },
     { href: "#contact", label: "Contact" },
+    { href: "/legacy-list", label: "Legacy List" },
   ];
 
   return (
