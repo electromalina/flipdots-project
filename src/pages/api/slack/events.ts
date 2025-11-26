@@ -38,11 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     // Log the request for debugging (sanitized)
-    console.log('Slack request received:', {
+    console.log('🔔 Slack request received:', {
       command: data.command,
       hasText: !!data.text,
       user: data.user_name,
-      channel: data.channel_name
+      channel: data.channel_name,
+      text: data.text?.substring(0, 50) // First 50 chars for debugging
     });
     
     // Check if it's a slash command
@@ -84,10 +85,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = createSlackSuccessResponse(githubUrl, repoInfo);
     
     // Log the upload
+    console.log('📝 About to log upload:', { githubUrl, repo: repoInfo.repo });
     logUpload(githubUrl, repoInfo, {
       user_name: data.user_name,
       channel_name: data.channel_name
     });
+    console.log('✅ Upload logged successfully');
     
     res.status(200).json(response);
     

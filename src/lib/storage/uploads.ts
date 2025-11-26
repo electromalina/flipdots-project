@@ -44,18 +44,25 @@ function loadFromFile(): Upload[] {
   // Always try to read, even if previous check failed
   // In serverless, the file might exist from a previous invocation
   try {
-    if (fs.existsSync(UPLOADS_FILE)) {
+    console.log(`Attempting to load from: ${UPLOADS_FILE}`);
+    const fileExists = fs.existsSync(UPLOADS_FILE);
+    console.log(`File exists: ${fileExists}`);
+    
+    if (fileExists) {
       const content = fs.readFileSync(UPLOADS_FILE, 'utf8');
+      console.log(`File content length: ${content.length} bytes`);
       const uploads = JSON.parse(content) || [];
-      console.log(`Loaded ${uploads.length} uploads from file: ${UPLOADS_FILE}`);
+      console.log(`✅ Loaded ${uploads.length} uploads from file: ${UPLOADS_FILE}`);
+      console.log(`Uploads data:`, JSON.stringify(uploads, null, 2));
       // If we successfully read, mark file system as available
       fileSystemAvailable = true;
       return uploads;
     } else {
-      console.log(`Uploads file does not exist yet: ${UPLOADS_FILE}`);
+      console.log(`⚠️ Uploads file does not exist yet: ${UPLOADS_FILE}`);
+      console.log(`Directory exists: ${fs.existsSync(path.dirname(UPLOADS_FILE))}`);
     }
   } catch (error) {
-    console.warn('Error reading uploads from file:', error);
+    console.error('❌ Error reading uploads from file:', error);
     // Don't set fileSystemAvailable to false here - might be a read error, not a write error
   }
   
@@ -72,15 +79,27 @@ function saveToFile(uploads: Upload[]): boolean {
   // Always try to save, even if previous check failed
   try {
     const dir = path.dirname(UPLOADS_FILE);
+    console.log(`Attempting to save to: ${UPLOADS_FILE}`);
+    console.log(`Directory: ${dir}`);
+    
     if (!fs.existsSync(dir)) {
+      console.log(`Creating directory: ${dir}`);
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(UPLOADS_FILE, JSON.stringify(uploads, null, 2));
-    console.log(`Saved ${uploads.length} uploads to file: ${UPLOADS_FILE}`);
+    
+    const jsonContent = JSON.stringify(uploads, null, 2);
+    console.log(`Writing ${jsonContent.length} bytes to file`);
+    fs.writeFileSync(UPLOADS_FILE, jsonContent);
+    
+    // Verify the file was written
+    const verifyExists = fs.existsSync(UPLOADS_FILE);
+    const verifySize = verifyExists ? fs.statSync(UPLOADS_FILE).size : 0;
+    console.log(`✅ Saved ${uploads.length} uploads to file: ${UPLOADS_FILE}`);
+    console.log(`File verification: exists=${verifyExists}, size=${verifySize} bytes`);
     fileSystemAvailable = true;
     return true;
   } catch (error) {
-    console.warn('Error saving uploads to file:', error);
+    console.error('❌ Error saving uploads to file:', error);
     fileSystemAvailable = false;
     return false;
   }
