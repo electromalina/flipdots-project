@@ -1,15 +1,15 @@
-# 🎮 Flipboard Slack API
+#  Flipboard Slack API
 
 A modern Next.js application that integrates with Slack to allow users to upload and share GitHub repositories via slash commands. Features a React dashboard and a 3D gallery room to visualize uploaded repositories.
 
-## ✨ Features
+##  Features
 
-- **🎮 Slack Integration** - `/upload-flipboard` slash command to share GitHub repositories
-- **📊 React Dashboard** - Beautiful UI to view upload history
-- **🎨 3D Gallery Room** - Interactive 3D raycaster gallery displaying repositories as paintings
-- **🔗 GitHub Validation** - Automatic URL parsing and validation
-- **💾 File-based Storage** - JSON file storage (keeps last 6 uploads)
-- **⚡ Flipdot Display** - 15 FPS flipdot display output module
+- ** Slack Integration** - `/upload-flipboard` slash command to share GitHub repositories
+- ** React Dashboard** - Beautiful UI to view upload history
+- ** 3D Gallery Room** - Interactive 3D raycaster gallery displaying repositories as paintings
+- ** GitHub Validation** - Automatic URL parsing and validation
+- ** File-based Storage** - JSON file storage (keeps last 6 uploads)
+- ** Flipdot Display** - 15 FPS flipdot display output module
 
 ## 📁 Project Structure
 
@@ -85,7 +85,7 @@ The server will start at `http://localhost:3000`
 - `GET /api/uploads` - Get all uploads (JSON)
 - `POST /api/slack/events` - Slack slash command handler
 
-## 🚀 Slack Integration
+##  Slack Integration
 
 ### 1. Create Slack App
 
@@ -137,7 +137,7 @@ Or with @mention format:
 - `https://github.com/user/repo/tree/branch`
 - `https://github.com/user/repo/tree/branch/path/to/folder`
 
-## 🎨 3D Gallery Room
+##  3D Gallery Room
 
 The 3D Gallery Room is an interactive raycaster-based gallery that displays uploaded GitHub repositories as paintings on the walls.
 
@@ -186,7 +186,7 @@ The `tsconfig.json` includes:
 - Strict type checking
 - Next.js plugin support
 
-## 🌐 Production Deployment
+##  Production Deployment
 
 ### Option 1: Vercel (Recommended)
 
@@ -234,7 +234,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
-## 📦 Modules
+##  Modules
 
 ### Flipdot Display Module
 
@@ -246,7 +246,7 @@ Located in `modules/flipdot-display/`, this module provides:
 
 See `modules/flipdot-display/README.md` for details.
 
-## 🧪 Testing
+##  Testing
 
 ### API Testing
 
@@ -265,7 +265,7 @@ curl -X POST http://localhost:3000/api/slack/events \
   -d '{"command":"/upload-flipboard","text":"https://github.com/user/repo"}'
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -371,7 +371,7 @@ Handles Slack slash commands.
 }
 ```
 
-## 🔐 Security Notes
+##  Security Notes
 
 - Never commit `.env` files or secrets to git
 - Use environment variables for sensitive data
@@ -383,7 +383,7 @@ Handles Slack slash commands.
 
 MIT License
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch
