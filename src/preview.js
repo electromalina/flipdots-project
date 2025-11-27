@@ -23,7 +23,9 @@ export function setSpotifyService(service) {
 		if (req.url === "/api/auth/status") {
 			let isAuthenticated = false;
 			if (spotifyService) {
-				isAuthenticated = await spotifyService.isAuthenticated();
+				// Skip cache to get fresh authentication status
+				// This ensures we detect token refresh failures immediately
+				isAuthenticated = await spotifyService.isAuthenticated(true);
 			}
 			res.writeHead(200, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ authenticated: isAuthenticated }));
@@ -328,6 +330,15 @@ export function setSpotifyService(service) {
                     // Authenticated - hide login, show status
                     loginButton.classList.remove('show');
                     authStatus.classList.remove('hide');
+                    
+                    // Update status message based on playback state
+                    if (data.hasPlayback) {
+                        authStatus.textContent = '✓ Connected to Spotify';
+                        authStatus.style.color = '#1DB954';
+                    } else {
+                        authStatus.textContent = '✓ Connected - No music playing';
+                        authStatus.style.color = '#888';
+                    }
                 } else {
                     // Not authenticated - show login, hide status
                     loginButton.classList.add('show');

@@ -138,9 +138,19 @@ async function updateTrackData(forceUpdate = false) {
 				const albumArt = await musicService.getAlbumArt(newTrackData, 28, height);
 				state.setAlbumArt(albumArt);
 			}
+		} else {
+			// No track data - clear the state to show idle state
+			if (state.track.current !== null) {
+				if (DEBUG) console.log('No track playing - clearing state');
+				state.updateTrack(null);
+			}
 		}
 	} catch (error) {
 		if (DEBUG) console.error('Track update error:', error.message);
+		// On error, also clear the state if we had one
+		if (state.track.current !== null) {
+			state.updateTrack(null);
+		}
 	}
 }
 

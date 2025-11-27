@@ -66,10 +66,8 @@ export class SpotifyService {
                 this.spotifyApi.setRefreshToken(tokens.refreshToken);
                 console.log('Loaded saved Spotify tokens');
                 
-                // Optimistically assume loaded tokens are valid
-                // Will be verified on first isAuthenticated() call
-                this.authStatusCache.isValid = true;
-                this.authStatusCache.lastCheck = Date.now();
+                // Don't set cache optimistically - verify tokens are valid on first check
+                // This ensures expired/invalid tokens are detected immediately
             }
         } catch (error) {
             console.log('No saved Spotify tokens found');
@@ -91,6 +89,26 @@ export class SpotifyService {
         }
     }
 
+    clearTokens() {
+        try {
+            const tokenPath = path.resolve(import.meta.dirname, '../../.spotify-tokens.json');
+            if (fs.existsSync(tokenPath)) {
+                fs.unlinkSync(tokenPath);
+                console.log('Cleared saved Spotify tokens');
+            }
+            
+            // Clear tokens from API instance
+            this.spotifyApi.setAccessToken('');
+            this.spotifyApi.setRefreshToken('');
+            
+            // Invalidate auth cache
+            this.authStatusCache.isValid = false;
+            this.authStatusCache.lastCheck = Date.now();
+        } catch (error) {
+            console.error('Failed to clear Spotify tokens:', error);
+        }
+    }
+
     async refreshAccessToken() {
         try {
             console.log('Refreshing access token...');
@@ -108,6 +126,17 @@ export class SpotifyService {
             return true;
         } catch (error) {
             console.error('Failed to refresh access token:', error);
+            
+            // Invalidate auth cache when refresh fails
+            this.authStatusCache.isValid = false;
+            this.authStatusCache.lastCheck = Date.now();
+            
+            // If refresh token is invalid (400 or 401), clear saved tokens
+            if (error.statusCode === 400 || error.statusCode === 401) {
+                console.log('Refresh token invalid, clearing saved tokens');
+                this.clearTokens();
+            }
+            
             return false;
         }
     }
