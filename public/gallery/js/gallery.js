@@ -11,6 +11,7 @@ import {
   LOOK_PRECISION
 } from './config.js';
 import { getPlayerPosition } from './player.js';
+import { reloadSVGImages } from './engine.js';
 
 // =============================================================================
 // GALLERY PAINTINGS CONFIGURATION
@@ -18,16 +19,16 @@ import { getPlayerPosition } from './player.js';
 
 /**
  * Interactive gallery paintings positioned on walls
- * These will be populated from API data
+ * These will be populated from API data with SVG URLs dynamically constructed from GitHub URLs
  */
 export let galleryFrames = [
   // Default paintings (will be replaced by API data)
-  { x: 3, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
-  { x: 6, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
-  { x: 3, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
-  { x: 6, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
-  { x: 9.5, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
-  { x: 10.5, y: 2.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
+  { x: 3, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
+  { x: 6, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
+  { x: 3, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
+  { x: 6, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
+  { x: 9.5, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
+  { x: 10.5, y: 2.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg_image_url: null },
 ];
 
 /**
@@ -35,6 +36,36 @@ export let galleryFrames = [
  * This stores the complete list for the sidebar
  */
 export let allUploads = [];
+
+// =============================================================================
+// SVG ICON URL CONSTRUCTION
+// =============================================================================
+
+/**
+ * Get multiple SVG icon URLs to try for a GitHub repository
+ * Constructs URLs for common icon locations: icon.svg, icon/icon.svg, icons/icon.svg
+ * @param {string} githubUrl - GitHub repository URL
+ * @param {string} branch - Branch name (default: 'main')
+ * @returns {string[]} Array of SVG URLs to try in order
+ */
+function getSVGIconUrls(githubUrl, branch = 'main') {
+  // Parse GitHub URL to extract owner/repo
+  const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (!match) return [];
+  
+  const owner = match[1];
+  const repo = match[2];
+  const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}`;
+  
+  // Common icon paths to try (in order of preference)
+  return [
+    `${baseUrl}/icon.svg`,
+    `${baseUrl}/icon/icon.svg`,
+    `${baseUrl}/icons/icon.svg`,
+    `${baseUrl}/assets/icon.svg`,
+    `${baseUrl}/assets/icons/icon.svg`,
+  ];
+}
 
 // =============================================================================
 // API INTEGRATION
@@ -93,15 +124,17 @@ async function loadGalleryData() {
     }
 
     if (!uploads || !Array.isArray(uploads) || uploads.length === 0) {
-      console.log('⚠️ No valid uploads data, using demo data');
-      uploads = createDemoData();
+      console.log('⚠️ No valid uploads data found');
+      allUploads = [];
+      updateGalleryFrames([]);
+      return;
     }
 
     // Store all uploads for sidebar display
     allUploads = uploads;
 
     // Update gallery frames with API data (only first 6 for paintings)
-    updateGalleryFrames(uploads);
+    await updateGalleryFrames(uploads);
 
     // Trigger custom event for sidebar update
     if (typeof window !== 'undefined') {
@@ -110,49 +143,17 @@ async function loadGalleryData() {
 
   } catch (error) {
     console.error('❌ Error loading gallery data:', error);
-    // Use demo data as fallback
-    const demoData = createDemoData();
-    allUploads = demoData;
-    updateGalleryFrames(demoData);
-
-    // Trigger custom event for sidebar update
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('galleryUpdated', { detail: demoData }));
-    }
+    allUploads = [];
+    await updateGalleryFrames([]);
   }
 }
 
 /**
- * Create demo data for testing
- */
-function createDemoData() {
-  return [
-    {
-      github_url: 'https://github.com/JenWillems/Tipsy-Dragon-Game',
-      timestamp: new Date().toISOString(),
-      user_name: 'JenWillems',
-      repo_name: 'Tipsy-Dragon-Game'
-    },
-    {
-      github_url: 'https://github.com/electromalina/flipdots-project',
-      timestamp: new Date().toISOString(),
-      user_name: 'electromalina',
-      repo_name: 'flipdots-project'
-    },
-    {
-      github_url: 'https://github.com/octocat/Hello-World',
-      timestamp: new Date().toISOString(),
-      user_name: 'octocat',
-      repo_name: 'Hello-World'
-    }
-  ];
-}
-
-/**
  * Update gallery frames with upload data
+ * Dynamically constructs SVG icon URLs from GitHub repository URLs
  * @param {Array} uploads - Array of upload objects from API
  */
-function updateGalleryFrames(uploads) {
+async function updateGalleryFrames(uploads) {
   console.log('🖼️ Updating gallery frames with data:', uploads);
 
   // Fixed painting positions on the walls
@@ -202,6 +203,11 @@ function updateGalleryFrames(uploads) {
     }
 
     const userName = upload.user_name || upload.slack_user || 'Unknown User';
+    
+    // Construct SVG icon URLs dynamically from GitHub URL (no database needed)
+    const branch = upload.branch || 'main';
+    const svgIconUrls = getSVGIconUrls(githubUrl, branch);
+    const svgImageUrl = svgIconUrls.length > 0 ? svgIconUrls[0] : null; // Primary URL to try
 
     galleryFrames.push({
       x: position.x,
@@ -213,7 +219,10 @@ function updateGalleryFrames(uploads) {
       timestamp: upload.timestamp || new Date().toISOString(),
       lastTrigger: 0,
       colorIndex: i,  // Store color index for minimap matching
-      uploadIndex: i  // Store original upload index
+      uploadIndex: i,  // Store original upload index
+      svg_image_url: svgImageUrl,  // Primary SVG URL (dynamically constructed)
+      svgUrl: svgImageUrl,  // Legacy support
+      svgIconUrls: svgIconUrls  // All URLs to try (for fallback)
     });
   }
 
@@ -228,7 +237,10 @@ function updateGalleryFrames(uploads) {
       title: 'Empty Slot',
       user: 'system',
       timestamp: new Date().toISOString(),
-      lastTrigger: 0
+      lastTrigger: 0,
+      svg_image_url: null,
+      svgUrl: null,
+      svgIconUrls: []
     });
   }
 
@@ -236,8 +248,11 @@ function updateGalleryFrames(uploads) {
 
   // Log painting info for debugging
   galleryFrames.forEach((frame, i) => {
-    console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y})`);
+    console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y}) [SVG: ${frame.svg_image_url || 'none'}]`);
   });
+
+  // Reload SVG images when gallery updates
+  await reloadSVGImages();
 }
 
 

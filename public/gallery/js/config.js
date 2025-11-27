@@ -52,7 +52,7 @@ export const SMOOTH_FACTOR = 0.7;
 export const PILLAR_THICKNESS = 2;
 
 /** Width of gallery frame rendering in pixels - affects painting frame thickness */
-export const FRAME_THICKNESS = 3;
+export const FRAME_THICKNESS = 30; // Increased for better SVG visibility
 
 /** Target frame rate for consistent gameplay - lower FPS for retro feel */
 export const TARGET_FPS = 15;
@@ -68,10 +68,10 @@ export const RAY_STEP_SIZE = 0.05;
 export const MAX_RAY_STEPS = 64;
 
 // =============================================================================
-// CANVAS DIMENSIONS
+// CANVAS DIMENSIONS (Native Flipdot Display Resolution)
 // =============================================================================
 
-/** Main canvas resolution */
+/** Main canvas resolution - Native flipdot display: 84x28 */
 export const CANVAS_WIDTH = 84;
 export const CANVAS_HEIGHT = 28;
 
