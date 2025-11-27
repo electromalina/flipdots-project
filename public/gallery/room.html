@@ -29,7 +29,7 @@
   - Click paintings: Open GitHub repository in new tab
   
   Author: Flipboard Project Team
-  Last Updated: 2024
+  Last Updated: 2025
   =============================================================================
   -->
   <meta charset="utf-8" />
@@ -494,6 +494,80 @@
       max-width: 1800px;
       box-sizing: border-box;
     }
+
+.flipdot-controls {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flipdot-button {
+  appearance: none;
+  border: 2px solid #0f0;
+  background: #000;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95em;
+  font-weight: bold;
+  padding: 10px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.flipdot-button:hover:not(:disabled) {
+  background: #0f0;
+  color: #000;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.4);
+}
+
+.flipdot-button:disabled {
+  border-color: #666;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.flipdot-status {
+  border: 1px solid #333;
+  padding: 10px 12px;
+  font-size: 0.85em;
+  color: #ccc;
+  background: #050505;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flipdot-status-text {
+  flex: 1;
+}
+
+.flipdot-status[data-state="ready"] {
+  border-color: #0f0;
+  color: #0f0;
+}
+
+.flipdot-status[data-state="pending"] {
+  border-color: #ff0;
+  color: #ff0;
+}
+
+.flipdot-status[data-state="error"] {
+  border-color: #f33;
+  color: #f66;
+}
+
+.flipdot-status small {
+  color: #888;
+  font-size: 0.75em;
+}
     
     .status::before {
       content: '';
@@ -781,6 +855,16 @@
             <li>🔄 Gallery auto-updates every 30 seconds</li>
             <li>📱 Up to 6 most recent uploads displayed</li>
           </ul>
+
+          <div class="flipdot-controls">
+            <button id="flipdotCastBtn" class="flipdot-button">
+              ▶️ Cast to Flipdot Board
+            </button>
+            <div id="flipdotStatus" class="flipdot-status" data-state="idle">
+              <span class="flipdot-status-text">Flipdot caster idle</span>
+              <small id="flipdotStatusMeta">Target: 15 FPS</small>
+            </div>
+          </div>
         </div>
         
         <div class="minimap-container">
@@ -839,6 +923,14 @@
     const loading = document.getElementById('loading');
     const galleryStatus = document.getElementById('galleryStatus');
     const uploadsList = document.getElementById('uploadsList');
+    const flipdotCastBtn = document.getElementById('flipdotCastBtn');
+    const flipdotStatusEl = document.getElementById('flipdotStatus');
+    const flipdotStatusText = document.querySelector('#flipdotStatus .flipdot-status-text');
+    const flipdotStatusMeta = document.getElementById('flipdotStatusMeta');
+    const FLIPDOT_STREAM_BASE = (
+      window.FLIPDOT_STREAM_URL ??
+      (window.location.port === '4000' ? window.location.origin : 'http://localhost:4000')
+    ).replace(/\/$/, '');
 
     // Initialize the rendering engine
     initializeEngine(canvas, post, mini);
@@ -983,6 +1075,27 @@
     requestAnimationFrame(gameLoop);
 
     // =============================================================================
+    // FLIPDOT CAST CONTROLS
+    // =============================================================================
+
+    if (flipdotCastBtn) {
+      flipdotCastBtn.addEventListener('click', () => {
+        startFlipdotCast()
+          .catch((error) => {
+            console.error('[flipdot] Failed to start cast', error);
+            setFlipdotStatus(`Error: ${error.message}`, 'error');
+          });
+      });
+    }
+
+    if (flipdotStatusEl) {
+      refreshFlipdotStatus({ silent: true });
+      setInterval(() => {
+        refreshFlipdotStatus({ silent: true });
+      }, 15000);
+    }
+
+    // =============================================================================
     // DEBUG INFORMATION
     // =============================================================================
 
@@ -997,6 +1110,96 @@
     // Manual refresh function for debugging
     window.refreshGallery = refreshGallery;
     console.log('💡 Type refreshGallery() in console to manually refresh paintings');
+
+    async function startFlipdotCast() {
+      if (!flipdotCastBtn) {
+        return;
+      }
+
+      const payload = {
+        frames: TARGET_FPS * 3,
+        frameDelayMs: Math.round(1000 / TARGET_FPS),
+        selector: '#v',
+        roomUrl: window.location.href
+      };
+
+      setFlipdotStatus(`Casting ${payload.frames} frames @ ${TARGET_FPS} FPS...`, 'pending');
+      flipdotCastBtn.disabled = true;
+
+      console.log('[flipdot] Triggering capture payload:', payload);
+
+      try {
+        const response = await fetch(`${FLIPDOT_STREAM_BASE}/api/push-room`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorBody}`);
+        }
+
+        const result = await response.json();
+        console.log('[flipdot] Flipdot caster response:', result);
+
+        const framesSent = result.framesSent ?? payload.frames;
+        setFlipdotStatus(`Sent ${framesSent} frames to flipdot`, 'ready');
+        await refreshFlipdotStatus();
+      } catch (error) {
+        console.error('[flipdot] Unable to communicate with flipdot caster', error);
+        setFlipdotStatus('Flipdot caster unreachable', 'error');
+        throw error;
+      } finally {
+        flipdotCastBtn.disabled = false;
+      }
+    }
+
+    async function refreshFlipdotStatus({ silent = false } = {}) {
+      if (!flipdotStatusEl) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${FLIPDOT_STREAM_BASE}/api/status`, {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-store' }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const status = await response.json();
+        if (!silent) {
+          console.log('[flipdot] Live status:', status);
+        }
+
+        const live = status.live ?? {};
+        const frameInterval = live.frameIntervalMs ?? Math.round(1000 / TARGET_FPS);
+        const fps = frameInterval ? Math.round(1000 / frameInterval) : TARGET_FPS;
+        const dispatched = live.framesDispatched ?? 0;
+        const uptimeSec = live.uptimeMs ? Math.round(live.uptimeMs / 1000) : 0;
+
+        setFlipdotStatus(`Live ${fps} FPS · ${dispatched} frames · ${uptimeSec}s uptime`, 'ready');
+      } catch (error) {
+        if (!silent) {
+          console.warn('[flipdot] Status check failed', error);
+        }
+        setFlipdotStatus('Flipdot caster offline', 'error');
+      }
+    }
+
+    function setFlipdotStatus(message, state = 'idle') {
+      if (!flipdotStatusEl) {
+        return;
+      }
+      (flipdotStatusText ?? flipdotStatusEl).textContent = message;
+      flipdotStatusEl.dataset.state = state;
+      if (flipdotStatusMeta) {
+        flipdotStatusMeta.textContent = `Target: ${TARGET_FPS} FPS`;
+      }
+    }
   </script>
 </body>
 </html>
