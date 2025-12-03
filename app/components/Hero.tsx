@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Hero() {
   // Calculate grid size - adjusted for better screen fit
@@ -220,9 +221,14 @@ export default function Hero() {
         {/* Right Section - CTA Button + OWOW x Fontys */}
         <div className="text-right flex flex-col items-end gap-4">
           {/* Call to Action Button */}
-          <button className="bg-primary text-white px-6 py-3 rounded-lg font-heading font-semibold text-sm sm:text-base hover:bg-primary/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+          <Link 
+            href="https://flipdots-project.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-primary text-white px-6 py-3 rounded-lg font-heading font-semibold text-sm sm:text-base hover:bg-primary/90 transition-colors duration-200 shadow-lg hover:shadow-xl inline-block"
+          >
             Explore the Room
-          </button>
+          </Link>
           
           <p className="font-heading text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             OWOW <span className="text-white/60">x</span>{" "}

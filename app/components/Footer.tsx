@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,10 +13,13 @@ export default function Footer() {
           {/* Brand & Project Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <span className="font-heading text-black text-lg font-bold">R</span>
-              </div>
-              <span className="font-heading text-3xl font-bold">ROOM</span>
+              <Image
+                src="/assets/logo.png"
+                alt="ROOM Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <p className="font-body text-white/80 mb-6 leading-relaxed">
               An interactive flipdot display experience exploring the intersection of mechanical and digital worlds.
@@ -37,7 +41,9 @@ export default function Footer() {
             <h3 className="font-heading text-lg font-bold mb-6">Navigate</h3>
             <nav className="space-y-4">
               <Link
-                href="#explore"
+                href="https://flipdots-project.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block font-body text-white/80 hover:text-white transition-colors text-lg"
               >
                 Explore the Room
@@ -52,7 +58,7 @@ export default function Footer() {
                 href="#about"
                 className="block font-body text-white/80 hover:text-white transition-colors text-lg"
               >
-                About Flipdots
+                About Room
               </Link>
             </nav>
           </div>

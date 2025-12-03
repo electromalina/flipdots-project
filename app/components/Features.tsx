@@ -3,15 +3,15 @@ import Image from 'next/image';
 export default function Features() {
   const features = [
     {
-      title: "1: Data Sources",
+      title: "1: Data Sources and Widget Development",
       description:
-        "Live inputs like weather, music, or mini-games provide dynamic content. Each data source connects to a widget that transforms abstract information into visuals.",
+        "We pull in real-time data from various sources — whether it's the current weather, your favorite Spotify track, or fun mini-games. Each source becomes a widget that turns information into something you can see and interact with.",
       icon: "/data-science.svg",
     },
     {
       title: "2. Widgets in the 3D Room",
       description:
-        "The system places these widgets as digital paintings inside a 3D room. The room is a gallery — each wall can showcase different interactive experiences, from a Spotify album art to a real-time weather mural.",
+        "These widgets come alive as digital paintings hanging in our 3D gallery space. Think of it like walking through an art museum where each wall tells a different story — one might show your music, another displays the weather, all creating a unique visual experience.",
       icon: "/grid.svg",
     },
     {
@@ -41,7 +41,7 @@ export default function Features() {
         <div className="mb-16 flex justify-start">
           <div className="inline-block bg-black py-6 px-8 rounded-lg">
             <h2 className="font-heading text-4xl sm:text-5xl font-bold text-white">
-              HOW IT WORKS?
+              HOW OUR PROJECT WORKS?
             </h2>
           </div>
         </div>

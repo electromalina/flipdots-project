@@ -59,7 +59,7 @@ export default function LegacyListPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Legacy List</h1>
           <p className="text-foreground/60">
-            Browse and copy GitHub repositories for flipdots
+            Browse and copy GitHub repositories for room
           </p>
         </div>
 

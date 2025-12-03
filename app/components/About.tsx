@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface FlipdotProps {
   index: number;
@@ -78,12 +79,23 @@ export default function About() {
             </h2>
             <div className="space-y-4 font-body text-foreground/80">
               <p>
-                Flip-dot displays combine the nostalgia of mechanical signage with modern digital control systems. Each dot is a physical disc that flips between two colors, creating a unique aesthetic that stands out in our increasingly digital world.
+                Flip-dot displays, also known as flip-disc displays, are electromechanical signs that use small discs to show information. Each disc has two sides with contrasting colors and can flip to display different images or text. These displays are energy-efficient and highly visible, making them ideal for public transportation signs and other applications requiring clear, dynamic information.
               </p>
               <p>
-                Originally developed for transportation signage in the 1950s, flip-dot technology has evolved into a versatile display solution perfect for art installations, retail displays, information boards, and creative projects.
+                Originally developed in the 1950s, flip-dot technology has evolved into a versatile display solution perfect for art installations, retail displays, information boards, and creative projects. The distinctive clicking sound and retro aesthetic of these mechanical marvels continue to captivate audiences in our digital age.
               </p>
-              
+              <p className="pt-2">
+                Learn more about flip-dot displays at{' '}
+                <Link
+                  href="https://flipdots.com/en/products-services/flip-dot-boards-xy5/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Alfa-Zeta
+                </Link>
+                , a leading manufacturer of flip-dot displays.
+              </p>
             </div>
           </div>
 
