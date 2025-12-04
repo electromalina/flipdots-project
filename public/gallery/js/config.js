@@ -52,7 +52,7 @@ export const SMOOTH_FACTOR = 0.7;
 export const PILLAR_THICKNESS = 2;
 
 /** Width of gallery frame rendering in pixels - affects painting frame thickness */
-export const FRAME_THICKNESS = 300; // Increased for better SVG visibility
+export const FRAME_THICKNESS = 30; // Increased for better SVG visibility
 
 /** Target frame rate for consistent gameplay - lower FPS for retro feel */
 export const TARGET_FPS = 15;
