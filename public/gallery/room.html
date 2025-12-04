@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!-- 
   =============================================================================
@@ -28,67 +29,91 @@
   - Mouse: Look around
   - Click paintings: Open GitHub repository in new tab
   
-  Author: Flipboard Project Team
-  Last Updated: 2024
+  Author: Team NANO
+  Last Updated: 2025
   =============================================================================
   -->
+  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+  <script>
+    window._controllerIO = window.io;
+  </script>
+  <script type="module" src="./main.js"></script>
+
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <style>
     /* =============================================================================
        FLIPBOARD 3D GALLERY STYLES
        ============================================================================= */
-    
+
     /* Main game display container - native flipdot resolution: 84x28 */
-    .stage { 
-      position: relative; 
-      width: 840px;                              /* 84px * 10 scale factor */
-      height: 280px;                             /* 28px * 10 scale factor */
-      border: 2px solid #333;                    /* Flipboard-style border */
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);   /* Subtle depth effect */
+    .stage {
+      position: relative;
+      width: 840px;
+      /* 84px * 10 scale factor */
+      height: 280px;
+      /* 28px * 10 scale factor */
+      border: 2px solid #333;
+      /* Flipboard-style border */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      /* Subtle depth effect */
       margin: 0 auto;
-      image-rendering: pixelated;                /* Crisp pixel rendering */
-      image-rendering: -moz-crisp-edges;         /* Firefox */
-      image-rendering: crisp-edges;              /* Standard */
+      image-rendering: pixelated;
+      /* Crisp pixel rendering */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
     }
-    
+
     /* Primary raycaster canvas - native resolution: 84x28 pixels */
     /* This canvas renders the 3D world view at native flipdot resolution */
-    #v { 
-      image-rendering: pixelated;                /* Pixelated rendering for retro look */
-      image-rendering: -moz-crisp-edges;         /* Firefox */
-      image-rendering: crisp-edges;              /* Standard */
-      width: 840px;                              /* Native width * 10 scale */
-      height: 280px;                             /* Native height * 10 scale */
-      background: #000;                          /* Black background */
-      display: block; 
+    #v {
+      image-rendering: pixelated;
+      /* Pixelated rendering for retro look */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
+      width: 840px;
+      /* Native width * 10 scale */
+      height: 280px;
+      /* Native height * 10 scale */
+      background: #000;
+      /* Black background */
+      display: block;
     }
-    
+
     /* Overlay canvas for UI elements (pillars, frames, paintings) */
     /* This canvas renders interactive elements on top of the 3D view */
-    #post { 
-      image-rendering: pixelated;                /* Pixelated rendering for consistency */
-      image-rendering: -moz-crisp-edges;         /* Firefox */
-      image-rendering: crisp-edges;              /* Standard */
-      width: 840px;                              /* Native width * 10 scale */
-      height: 280px;                             /* Native height * 10 scale */
-      position: absolute; 
-      left: 0; 
-      top: 0; 
-      pointer-events: none; 
+    #post {
+      image-rendering: pixelated;
+      /* Pixelated rendering for consistency */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
+      width: 840px;
+      /* Native width * 10 scale */
+      height: 280px;
+      /* Native height * 10 scale */
+      position: absolute;
+      left: 0;
+      top: 0;
+      pointer-events: none;
     }
-    
+
     /* Development minimap */
-    #mini { 
-      image-rendering: pixelated; 
-      width: 280px; 
-      height: 280px; 
-      background: #222; 
+    #mini {
+      image-rendering: pixelated;
+      width: 280px;
+      height: 280px;
+      background: #222;
       border: 2px solid #333;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
     }
-    
+
     /* Minimap container with legend */
     .minimap-container {
       display: flex;
@@ -99,7 +124,7 @@
       flex: 0 0 auto;
       max-height: 30%;
     }
-    
+
     .minimap-legend {
       background: #000;
       border: 2px solid #fff;
@@ -109,20 +134,21 @@
       text-align: center;
       width: 100%;
       line-height: 1.6;
-      display: none; /* Hide legend for cleaner look */
+      display: none;
+      /* Hide legend for cleaner look */
     }
-    
+
     .minimap-legend strong {
       color: #fff;
       display: block;
       margin-bottom: 10px;
       font-size: 1.05em;
     }
-    
+
     .minimap-legend div {
       margin: 6px 0;
     }
-    
+
     /* Ensure minimap canvas is properly sized */
     #mini {
       width: 100%;
@@ -130,22 +156,22 @@
       height: auto;
       aspect-ratio: 1;
     }
-    
+
     /* Center layout and flipboard theme */
-    body { 
-      margin: 0; 
+    body {
+      margin: 0;
       padding: 20px;
-      display: flex; 
+      display: flex;
       flex-direction: column;
-      align-items: center; 
-      justify-content: flex-start; 
-      min-height: 100vh; 
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
       background: #000;
       font-family: 'Courier New', monospace;
       color: #fff;
       position: relative;
     }
-    
+
     /* Main content wrapper */
     .main-content {
       width: 100%;
@@ -156,7 +182,7 @@
       align-items: center;
       padding: 0 20px;
     }
-    
+
     /* Flipboard dot matrix effect */
     body::before {
       content: '';
@@ -165,8 +191,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
-          radial-gradient(circle at center, #222 1px, transparent 1px);
+      background-image:
+        radial-gradient(circle at center, #222 1px, transparent 1px);
       background-size: 12px 12px;
       opacity: 0.3;
       pointer-events: none;
@@ -217,7 +243,7 @@
       align-items: stretch;
       padding: 0 20px;
     }
-    
+
     /* Left panel (controls + minimap) */
     .left-panel {
       display: flex;
@@ -227,7 +253,7 @@
       height: 100%;
       overflow: hidden;
     }
-    
+
     /* Game area (center - most important) */
     .game-area {
       display: flex;
@@ -238,7 +264,7 @@
       height: 100%;
       overflow: hidden;
     }
-    
+
     /* Stage container for better alignment */
     .stage-wrapper {
       display: flex;
@@ -261,7 +287,7 @@
       flex: 0 0 auto;
       max-height: 45%;
     }
-    
+
     .controls h3 {
       margin-top: 0;
       margin-bottom: 10px;
@@ -273,11 +299,11 @@
       padding-bottom: 8px;
       border-bottom: 1px solid #333;
     }
-    
+
     .controls h3:not(:first-child) {
       margin-top: 16px;
     }
-    
+
     /* Uploads sidebar (right side) */
     .uploads-sidebar {
       background: #000;
@@ -290,7 +316,7 @@
       display: flex;
       flex-direction: column;
     }
-    
+
     .uploads-sidebar::before {
       content: '';
       position: absolute;
@@ -298,17 +324,15 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 8px,
-              rgba(255, 255, 255, 0.02) 8px,
-              rgba(255, 255, 255, 0.02) 16px
-          );
+      background:
+        repeating-linear-gradient(90deg,
+          transparent,
+          transparent 8px,
+          rgba(255, 255, 255, 0.02) 8px,
+          rgba(255, 255, 255, 0.02) 16px);
       pointer-events: none;
     }
-    
+
     .uploads-sidebar h3 {
       margin-top: 0;
       color: #fff;
@@ -321,31 +345,31 @@
       margin-bottom: 12px;
       flex-shrink: 0;
     }
-    
+
     .uploads-list {
       overflow-y: auto;
       flex: 1;
       position: relative;
       z-index: 1;
     }
-    
+
     .uploads-list::-webkit-scrollbar {
       width: 8px;
     }
-    
+
     .uploads-list::-webkit-scrollbar-track {
       background: #000;
     }
-    
+
     .uploads-list::-webkit-scrollbar-thumb {
       background: #333;
       border: 1px solid #666;
     }
-    
+
     .uploads-list::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
-    
+
     .upload-item {
       background: #111;
       border: 1px solid #333;
@@ -355,26 +379,26 @@
       position: relative;
       border-radius: 2px;
     }
-    
+
     .upload-item:hover {
       border-color: #fff;
       background: #1a1a1a;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
-    
+
     .upload-item.loading {
       text-align: center;
       color: #888;
       border-color: #666;
     }
-    
+
     .upload-item.empty {
       text-align: center;
       color: #666;
       border-color: #444;
       font-style: italic;
     }
-    
+
     .upload-item .repo-name {
       color: #fff;
       font-weight: bold;
@@ -386,7 +410,7 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .minimap-color-indicator {
       width: 16px;
       height: 16px;
@@ -396,18 +420,21 @@
       box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
       animation: pulse 2s ease-in-out infinite;
     }
-    
+
     @keyframes pulse {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 1;
         transform: scale(1);
       }
+
       50% {
         opacity: 0.8;
         transform: scale(1.1);
       }
     }
-    
+
     .upload-item .repo-info {
       display: flex;
       flex-wrap: wrap;
@@ -416,14 +443,14 @@
       font-size: 0.75em;
       color: #ccc;
     }
-    
+
     .upload-item .repo-info span {
       background: #000;
       padding: 3px 6px;
       border: 1px solid #444;
       border-radius: 2px;
     }
-    
+
     .upload-item .github-link {
       display: inline-block;
       color: #fff;
@@ -435,12 +462,12 @@
       margin-top: 6px;
       border-radius: 2px;
     }
-    
+
     .upload-item .github-link:hover {
       background: #fff;
       color: #000;
     }
-    
+
     .controls::before {
       content: '';
       position: absolute;
@@ -448,14 +475,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 8px,
-              rgba(255, 255, 255, 0.02) 8px,
-              rgba(255, 255, 255, 0.02) 16px
-          );
+      background:
+        repeating-linear-gradient(90deg,
+          transparent,
+          transparent 8px,
+          rgba(255, 255, 255, 0.02) 8px,
+          rgba(255, 255, 255, 0.02) 16px);
       pointer-events: none;
     }
 
@@ -498,7 +523,7 @@
       max-width: 1800px;
       box-sizing: border-box;
     }
-    
+
     .status::before {
       content: '';
       position: absolute;
@@ -506,8 +531,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
-          linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 51%);
+      background:
+        linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 51%);
       background-size: 8px 8px;
       pointer-events: none;
     }
@@ -547,10 +572,24 @@
     }
 
     @keyframes dots {
-      0%, 20% { content: ''; }
-      40% { content: '.'; }
-      60% { content: '..'; }
-      80%, 100% { content: '...'; }
+
+      0%,
+      20% {
+        content: '';
+      }
+
+      40% {
+        content: '.';
+      }
+
+      60% {
+        content: '..';
+      }
+
+      80%,
+      100% {
+        content: '...';
+      }
     }
 
     /* Navigation */
@@ -578,7 +617,7 @@
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
       image-rendering: pixelated;
     }
-    
+
     .nav a::before {
       content: '';
       position: absolute;
@@ -586,14 +625,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 4px,
-              rgba(255, 255, 255, 0.05) 4px,
-              rgba(255, 255, 255, 0.05) 8px
-          );
+      background:
+        repeating-linear-gradient(90deg,
+          transparent,
+          transparent 4px,
+          rgba(255, 255, 255, 0.05) 4px,
+          rgba(255, 255, 255, 0.05) 8px);
       transform: translateX(-100%);
       transition: transform 0.3s ease;
     }
@@ -604,17 +641,15 @@
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
       text-shadow: none;
     }
-    
+
     .nav a:hover::before {
       transform: translateX(0);
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 4px,
-              rgba(0, 0, 0, 0.05) 4px,
-              rgba(0, 0, 0, 0.05) 8px
-          );
+      background:
+        repeating-linear-gradient(90deg,
+          transparent,
+          transparent 4px,
+          rgba(0, 0, 0, 0.05) 4px,
+          rgba(0, 0, 0, 0.05) 8px);
     }
 
     /* Responsive design */
@@ -625,7 +660,7 @@
         height: calc(100vh - 260px);
       }
     }
-    
+
     @media (max-width: 1400px) {
       .game-container {
         grid-template-columns: 240px 1fr 260px;
@@ -633,34 +668,34 @@
         height: calc(100vh - 240px);
       }
     }
-    
+
     @media (max-width: 1200px) {
       .game-container {
         grid-template-columns: 220px 1fr 240px;
         gap: 16px;
         height: calc(100vh - 220px);
       }
-      
+
       .controls {
         padding: 12px;
         max-height: 40%;
       }
-      
+
       .controls h3 {
         font-size: 1em;
         margin-bottom: 8px;
       }
-      
+
       .controls li {
         font-size: 0.85em;
         padding: 3px 0;
       }
-      
+
       #mini {
         max-width: 200px;
       }
     }
- 
+
     @media (max-width: 900px) {
       .game-container {
         grid-template-columns: 1fr;
@@ -669,27 +704,27 @@
         min-height: auto;
         max-height: none;
       }
-      
+
       .left-panel {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
         height: auto;
       }
-      
+
       .controls {
         max-height: none;
       }
-      
+
       .minimap-container {
         max-height: none;
       }
-      
+
       .uploads-sidebar {
         grid-column: 1 / -1;
         height: 300px;
       }
-      
+
       .game-area {
         height: 400px;
       }
@@ -699,18 +734,20 @@
       .left-panel {
         grid-template-columns: 1fr;
       }
-      
+
       /* Scale down to 7.5x (maintains 3:1 aspect ratio) */
       .stage {
-        width: 630px;  /* 84px * 7.5 */
-        height: 210px; /* 28px * 7.5 */
+        width: 630px;
+        /* 84px * 7.5 */
+        height: 210px;
+        /* 28px * 7.5 */
       }
-      
+
       #v {
         width: 630px;
         height: 210px;
       }
-      
+
       #post {
         width: 630px;
         height: 210px;
@@ -721,36 +758,38 @@
       body {
         padding: 12px;
       }
-      
+
       .header {
         padding: 16px;
       }
-      
+
       .header h1 {
         font-size: 2em;
       }
-      
+
       /* Scale down to 5x (maintains 3:1 aspect ratio) */
       .stage {
-        width: 420px;  /* 84px * 5 */
-        height: 140px; /* 28px * 5 */
+        width: 420px;
+        /* 84px * 5 */
+        height: 140px;
+        /* 28px * 5 */
       }
-      
+
       #v {
         width: 420px;
         height: 140px;
       }
-      
+
       #post {
         width: 420px;
         height: 140px;
       }
-      
+
       #mini {
         width: 240px;
         height: 240px;
       }
-      
+
       .minimap-legend {
         font-size: 0.75em;
         padding: 10px 12px;
@@ -758,6 +797,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="main-content">
     <div class="header">
@@ -779,7 +819,7 @@
             <li><span class="key">Q/E</span> Turn left/right</li>
             <li><span class="key">↑↓←→</span> Alternative movement</li>
           </ul>
-          
+
           <h3>🖼️ Gallery</h3>
           <ul>
             <li>🔍 Look closely at paintings to trigger them</li>
@@ -788,13 +828,14 @@
             <li>📱 Up to 6 most recent uploads displayed</li>
           </ul>
         </div>
-        
+
         <div class="minimap-container">
-          <canvas id="mini" width="128" height="128" title="Minimap - Colored dots show your gallery paintings"></canvas>
+          <canvas id="mini" width="128" height="128"
+            title="Minimap - Colored dots show your gallery paintings"></canvas>
           <div class="minimap-legend"></div>
         </div>
       </div>
-        
+
       <div class="game-area">
         <div class="stage-wrapper">
           <div class="stage">
@@ -805,7 +846,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="uploads-sidebar">
         <h3>📋 All Uploads</h3>
         <div id="uploadsList" class="uploads-list">
@@ -823,13 +864,13 @@
 
   <!-- Three.js for hardware acceleration -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  
+
   <!-- Main application script -->
   <script type="module">
     // =============================================================================
     // MAIN APPLICATION ENTRY POINT
     // =============================================================================
-    
+
     import { TARGET_FPS } from './js/config.js';
     import { updateMovement, handleFloorInteractions, clearMovementKeys } from './js/player.js';
     import { updateGalleryInteractions, getGalleryFrameCount, refreshGallery, getAllUploads, getMarkerColor, getGalleryFrameByUrl } from './js/gallery.js';
@@ -853,6 +894,62 @@
     // Hide loading indicator
     loading.style.display = 'none';
 
+
+    // =============================================================================
+    // CONTROLLER SETUP
+    // =============================================================================
+
+    import {
+      remoteMove,
+      remoteLook,
+      remoteMoveHold,
+      remoteLookHold
+    } from './js/player.js';
+
+    function setupController() {
+      const ioFn = window._controllerIO;
+      if (!ioFn) {
+        console.warn("Controller IO not available");
+        return;
+      }
+
+      // Connect to controller server
+      const socket = ioFn("http://localhost:4000");
+      window.controllerSocket = socket; // For debugging
+
+      console.log("📱 Controller connected");
+
+      // Tap-based movement
+      socket.on("move", dir => {
+        remoteMove(dir);
+      });
+
+      socket.on("look", dir => {
+        remoteLook(dir);
+      });
+
+      // Hold-based movement
+      socket.on("move_start", dir => {
+        remoteMoveHold(dir, true);
+      });
+
+      socket.on("move_stop", dir => {
+        remoteMoveHold(dir, false);
+      });
+
+      // Hold-based looking
+      socket.on("look_start", dir => {
+        remoteLookHold(dir, true);
+      });
+
+      socket.on("look_stop", dir => {
+        remoteLookHold(dir, false);
+      });
+    }
+
+    setupController();
+
+
     // Update gallery status
     function updateGalleryStatus() {
       const count = getGalleryFrameCount();
@@ -872,12 +969,12 @@
      */
     function updateUploadsSidebar() {
       const uploads = getAllUploads();
-      
+
       if (!uploads || uploads.length === 0) {
         uploadsList.innerHTML = '<div class="upload-item empty">No uploads yet. Upload via Slack!</div>';
         return;
       }
-      
+
       uploadsList.innerHTML = uploads.map((upload, index) => {
         // Extract repo name from repository field or github_url
         let repoName = 'Unknown Repository';
@@ -889,22 +986,22 @@
             repoName = match[1];
           }
         }
-        
+
         const userName = upload.slack_user || upload.user_name || 'Unknown User';
         const branch = upload.branch || 'main';
         const timestamp = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : 'Unknown date';
-        
+
         // Find matching gallery frame to get color
         const galleryFrame = getGalleryFrameByUrl(upload.github_url);
         let colorIndicator = '';
-        
+
         if (galleryFrame !== null && galleryFrame.colorIndex !== undefined) {
           const color = getMarkerColor(galleryFrame.colorIndex);
           colorIndicator = `
             <div class="minimap-color-indicator" style="background-color: ${color}; border-color: ${color};" title="This color on minimap"></div>
           `;
         }
-        
+
         return `
           <div class="upload-item">
             <div class="repo-name">
@@ -926,12 +1023,12 @@
     setTimeout(() => {
       updateUploadsSidebar();
     }, 2500);
-    
+
     // Listen for gallery update events
     window.addEventListener('galleryUpdated', () => {
       updateUploadsSidebar();
     });
-    
+
     // Also update periodically
     setInterval(() => {
       updateUploadsSidebar();
@@ -947,37 +1044,48 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
+    let lastMini = 0;
     async function gameLoop(now) {
       // Calculate delta time with frame rate limiting
       const dt = Math.min(3, (now - last) / (1000 / TARGET_FPS));
       last = now;
-      
+
       // =============================================================================
       // UPDATE PHASE
       // =============================================================================
-      
+
       // Update player movement and check if cache needs invalidation
       const playerMoved = updateMovement(dt);
       if (playerMoved) {
         invalidateCache(); // Invalidate rendering cache when player rotates
       }
-      
+
       // Handle gallery painting interactions
       await updateGalleryInteractions(canvas, clearMovementKeys);
-      
+
       // Handle floor item interactions (F key)
       handleFloorInteractions(canvas);
-      
+
       // =============================================================================
       // RENDER PHASE
       // =============================================================================
-      
+
       // Render 3D scene
       render();
-      
+
       // Render development minimap
       renderMinimap();
-      
+      // SEND MINIMAP TO CONTROLLER @ 5fps
+      if (now - lastMini > 200) {
+        lastMini = now;
+        if (window.controllerSocket) {
+          const miniCanvas = document.getElementById('mini');
+          const dataUrl = miniCanvas.toDataURL("image/png");
+          window.controllerSocket.emit('minimap_frame', dataUrl);
+        }
+      }
+
+
       // Schedule next frame
       requestAnimationFrame(gameLoop);
     }
@@ -1000,10 +1108,11 @@
     console.log('🗺️ World map initialized');
     console.log('🎮 Controls: WASD/Arrow keys to move, QE to turn, F to interact');
     console.log('🖼️ Look at paintings closely to trigger them');
-    
+
     // Manual refresh function for debugging
     window.refreshGallery = refreshGallery;
     console.log('💡 Type refreshGallery() in console to manually refresh paintings');
   </script>
 </body>
+
 </html>
