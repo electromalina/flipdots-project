@@ -44,6 +44,10 @@ const ICON_PATHS = [
 const svgImages = new Map();
 let svgsLoaded = false;
 
+// SVG image cache for gallery frames (loaded from svg_image_url)
+const svgImages = new Map();
+let svgsLoaded = false;
+
 /**
  * Initialize all canvas contexts and Three.js setup
  * @param {HTMLCanvasElement} mainCanvas - Main rendering canvas
@@ -135,6 +139,130 @@ function loadSVGImages() {
     };
     img.src = svgPath;
   });
+  
+  // Load SVG images for gallery frames from database URLs
+  loadSVGImages();
+}
+
+/**
+ * Load SVG images for gallery frames
+ * Tries multiple icon paths if first one fails (dynamically constructed from GitHub URLs)
+ */
+function loadSVGImages() {
+  // Collect all SVG URLs to try (including fallbacks)
+  const svgUrlsToTry = new Map(); // Map of primary URL to array of URLs to try
+  
+  galleryFrames.forEach((gf) => {
+    const primaryUrl = gf.svg_image_url || gf.svgUrl;
+    if (!primaryUrl) return;
+    
+    if (gf.svgIconUrls && Array.isArray(gf.svgIconUrls) && gf.svgIconUrls.length > 0) {
+      // Use array of URLs to try (dynamically constructed)
+      svgUrlsToTry.set(primaryUrl, gf.svgIconUrls);
+    } else {
+      // Single URL (legacy support)
+      svgUrlsToTry.set(primaryUrl, [primaryUrl]);
+    }
+  });
+  
+  let loadedCount = 0;
+  const totalCount = svgUrlsToTry.size;
+  
+  if (totalCount === 0) {
+    svgsLoaded = true;
+    console.log('🖼️ No SVG images to load');
+    return;
+  }
+  
+  console.log(`🖼️ Loading ${totalCount} SVG images from GitHub repos...`);
+  
+  // Try loading SVGs for each frame
+  svgUrlsToTry.forEach((urls, primaryUrl) => {
+    tryLoadSVGForFrame(primaryUrl, urls, () => {
+      loadedCount++;
+      if (loadedCount === totalCount) {
+        svgsLoaded = true;
+        console.log('🖼️ All SVG textures loaded (or failed)');
+      }
+    });
+  });
+}
+
+/**
+ * Try loading SVG from multiple URLs for a frame
+ * @param {string} primaryUrl - Primary URL (used as key for lookup)
+ * @param {string[]} urls - Array of URLs to try in order
+ * @param {Function} onComplete - Callback when done (success or all failed)
+ */
+function tryLoadSVGForFrame(primaryUrl, urls, onComplete) {
+  if (!urls || urls.length === 0) {
+    onComplete();
+    return;
+  }
+  
+  let currentIndex = 0;
+  
+  function tryNext() {
+    if (currentIndex >= urls.length) {
+      console.log(`⚠️ Failed to load SVG (tried ${urls.length} paths): ${primaryUrl}`);
+      onComplete();
+      return;
+    }
+    
+    const url = urls[currentIndex];
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => {
+      // Store with primary URL as key (for lookup in render)
+      svgImages.set(primaryUrl, img);
+      console.log(`✅ Loaded SVG: ${url}`);
+      onComplete();
+    };
+    
+    img.onerror = () => {
+      currentIndex++;
+      tryNext(); // Try next URL
+    };
+    
+    img.src = url;
+  }
+  
+  tryNext();
+}
+
+/**
+ * Reload SVG images (call when gallery updates)
+ */
+export async function reloadSVGImages() {
+  svgsLoaded = false;
+  svgImages.clear();
+  loadSVGImages();
+}
+
+/**
+ * Draw a placeholder pattern for missing icons
+ * Simple thick vertical line for high visibility
+ * Uses integer coordinates to prevent rendering artifacts
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} width - Width of placeholder
+ * @param {number} height - Height of placeholder
+ */
+function drawMissingIconPlaceholder(ctx, x, y, width, height) {
+  // Ensure integer coordinates to prevent sub-pixel rendering artifacts
+  const intX = Math.floor(x);
+  const intY = Math.floor(y);
+  const intWidth = Math.ceil(width);
+  const intHeight = Math.ceil(height);
+  
+  // Draw a thick vertical line in the center
+  const centerX = intX + intWidth / 2;
+  const lineWidth = Math.max(3, Math.floor(Math.min(intWidth, intHeight) * 0.15));
+  
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(Math.floor(centerX - lineWidth / 2), intY, lineWidth, intHeight);
 }
 
 // =============================================================================
@@ -338,6 +466,21 @@ export function render() {
               frameDepths[cx] = dist;
             }
           }
+      const colFloat = (delta / halfFov) * (canvas.width / 2) + (canvas.width / 2);
+      const colCenter = Math.round(colFloat);
+      
+      for (let t = -Math.floor(FRAME_THICKNESS / 2); t <= Math.floor((FRAME_THICKNESS - 1) / 2); t++) {
+        const cx = colCenter + t;
+        if (cx >= 0 && cx < canvas.width) {
+          // Check if frame is at approximately the same distance as the wall (on the wall surface)
+          const wallDist = colDepth[cx] * 8; // Convert normalized depth back to distance
+          
+          // Frame is visible if it's at the wall distance (within tolerance) or closer
+          if (Math.abs(dist - wallDist) < 0.5 || dist <= wallDist) {
+            frameCols[cx] = true;
+            frameIndices[cx] = i;
+            frameDepths[cx] = dist;
+          }
         }
       }
     }
@@ -358,6 +501,7 @@ export function render() {
 
 /**
  * Render UI overlay elements (pillars, frames, edge lines)
+ * Enhanced with SVG texture rendering for flipdot display
  * @param {Int16Array} yTop - Top wall positions
  * @param {Int16Array} yBot - Bottom wall positions  
  * @param {boolean[]} cornerCols - Columns with pillars

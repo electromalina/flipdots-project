@@ -39,25 +39,27 @@
        FLIPBOARD 3D GALLERY STYLES
        ============================================================================= */
     
-    /* Main game display container - holds both canvas layers */
+    /* Main game display container - native flipdot resolution: 84x28 */
     .stage { 
       position: relative; 
-      width: 100%;
-      max-width: 1000px;
-      height: 100%;
-      max-height: 100%;
-      aspect-ratio: 3 / 1;
+      width: 840px;                              /* 84px * 10 scale factor */
+      height: 280px;                             /* 28px * 10 scale factor */
       border: 2px solid #333;                    /* Flipboard-style border */
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);   /* Subtle depth effect */
       margin: 0 auto;
+      image-rendering: pixelated;                /* Crisp pixel rendering */
+      image-rendering: -moz-crisp-edges;         /* Firefox */
+      image-rendering: crisp-edges;              /* Standard */
     }
     
-    /* Primary raycaster canvas - scaled 10x for visibility */
-    /* This canvas renders the 3D world view */
+    /* Primary raycaster canvas - native resolution: 84x28 pixels */
+    /* This canvas renders the 3D world view at native flipdot resolution */
     #v { 
       image-rendering: pixelated;                /* Pixelated rendering for retro look */
-      width: 100%; 
-      height: 100%; 
+      image-rendering: -moz-crisp-edges;         /* Firefox */
+      image-rendering: crisp-edges;              /* Standard */
+      width: 840px;                              /* Native width * 10 scale */
+      height: 280px;                             /* Native height * 10 scale */
       background: #000;                          /* Black background */
       display: block; 
     }
@@ -66,8 +68,10 @@
     /* This canvas renders interactive elements on top of the 3D view */
     #post { 
       image-rendering: pixelated;                /* Pixelated rendering for consistency */
-      width: 100%; 
-      height: 100%; 
+      image-rendering: -moz-crisp-edges;         /* Firefox */
+      image-rendering: crisp-edges;              /* Standard */
+      width: 840px;                              /* Native width * 10 scale */
+      height: 280px;                             /* Native height * 10 scale */
       position: absolute; 
       left: 0; 
       top: 0; 
@@ -696,9 +700,10 @@
         grid-template-columns: 1fr;
       }
       
+      /* Scale down to 7.5x (maintains 3:1 aspect ratio) */
       .stage {
-        width: 630px;
-        height: 210px;
+        width: 630px;  /* 84px * 7.5 */
+        height: 210px; /* 28px * 7.5 */
       }
       
       #v {
@@ -725,9 +730,10 @@
         font-size: 2em;
       }
       
+      /* Scale down to 5x (maintains 3:1 aspect ratio) */
       .stage {
-        width: 420px;
-        height: 140px;
+        width: 420px;  /* 84px * 5 */
+        height: 140px; /* 28px * 5 */
       }
       
       #v {
@@ -792,6 +798,7 @@
       <div class="game-area">
         <div class="stage-wrapper">
           <div class="stage">
+            <!-- Native flipdot resolution: 84x28 pixels (scaled 10x in CSS for visibility) -->
             <canvas id="v" width="84" height="28"></canvas>
             <canvas id="post" width="84" height="28"></canvas>
             <div class="loading" id="loading">Loading 3D Room</div>
