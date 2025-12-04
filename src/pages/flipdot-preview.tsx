@@ -145,7 +145,10 @@ export default function FlipdotPreview() {
           </label>
           
           <button
-            onClick={fetchLatestFrame}
+            onClick={() => {
+              fetchLatestFrame();
+              fetchStats();
+            }}
             style={{
               padding: '8px 16px',
               background: '#fff',
@@ -160,7 +163,7 @@ export default function FlipdotPreview() {
           </button>
         </div>
 
-        {stats && (
+        {frameNumber > 0 && (
           <div style={{
             background: '#111',
             border: '1px solid #333',
@@ -168,8 +171,7 @@ export default function FlipdotPreview() {
             borderRadius: '4px',
             textAlign: 'center'
           }}>
-            <div>Frames: {stats.live.framesCaptured} | Uptime: {Math.round(stats.live.uptimeMs / 1000)}s</div>
-            {frameNumber > 0 && <div>Current Frame: #{frameNumber}</div>}
+            <div>Current Frame: #{frameNumber}</div>
           </div>
         )}
 
