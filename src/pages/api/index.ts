@@ -9,7 +9,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         health: '/api/health',
         slack_events: '/api/slack/events',
         dashboard: '/dashboard',
-        uploads: '/api/uploads'
+        uploads: '/api/uploads',
+        flipdot_push_frame: '/api/flipdot/push-frame',
+        flipdot_status: '/api/flipdot/status'
       },
       timestamp: new Date().toISOString()
     });
