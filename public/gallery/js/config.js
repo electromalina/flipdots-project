@@ -52,7 +52,7 @@ export const SMOOTH_FACTOR = 0.7;
 export const PILLAR_THICKNESS = 2;
 
 /** Width of gallery frame rendering in pixels - affects painting frame thickness */
-export const FRAME_THICKNESS = 3;
+export const FRAME_THICKNESS = 30;
 
 /** Target frame rate for consistent gameplay - lower FPS for retro feel */
 export const TARGET_FPS = 15;
@@ -102,3 +102,7 @@ export const GALLERY_DOT_SIZE = 0.15;
 
 /** Player direction line length factor */
 export const DIRECTION_LINE_LENGTH = 0.8;
+
+
+export const FRAME_DOT_DISTANCE = 4.5;
+export const FRAME_HIDE_DISTANCE = 8;

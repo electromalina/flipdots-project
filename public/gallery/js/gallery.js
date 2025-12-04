@@ -20,9 +20,19 @@ import { getPlayerPosition } from './player.js';
  * Interactive gallery paintings positioned on walls
  * These will be populated from API data
  */
+
+// for now static icons instead of pulling them from git cuz idk how to do that
+const iconPaths = [
+  './icons/smallbadapple.png',
+  './icons/smallmusic.png',
+  './icons/smallpong.png',
+  './icons/smallpopthelock.png',
+  './icons/smallrain.png',
+  './icons/smalltimer.png',
+];
 export let galleryFrames = [
   // Default paintings (will be replaced by API data)
-  { x: 3, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
+  { x: 3, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system', svg: './icons/smallbadapple.png' },
   { x: 6, y: 0.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
   { x: 3, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
   { x: 6, y: 4.5, url: 'https://github.com', title: 'Loading...', user: 'system' },
@@ -213,7 +223,8 @@ function updateGalleryFrames(uploads) {
       timestamp: upload.timestamp || new Date().toISOString(),
       lastTrigger: 0,
       colorIndex: i,  // Store color index for minimap matching
-      uploadIndex: i  // Store original upload index
+      uploadIndex: i , // Store original upload index
+       svg: iconPaths[i % iconPaths.length]
     });
   }
 
@@ -228,7 +239,7 @@ function updateGalleryFrames(uploads) {
       title: 'Empty Slot',
       user: 'system',
       timestamp: new Date().toISOString(),
-      lastTrigger: 0
+      lastTrigger: 0,
     });
   }
 
@@ -236,7 +247,7 @@ function updateGalleryFrames(uploads) {
 
   // Log painting info for debugging
   galleryFrames.forEach((frame, i) => {
-    console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y})`);
+    console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y}) img:${frame.svg}`);
   });
 }
 
