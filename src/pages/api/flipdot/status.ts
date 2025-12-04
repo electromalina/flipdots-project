@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getStats } from '@/lib/flipdot/frameStore';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -6,19 +7,23 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Return status for flipdot caster
-  // TODO: Track actual stats if needed
+  const stats = getStats();
+
   res.json({
     live: {
-      framesCaptured: 0,
-      framesDispatched: 0,
+      framesCaptured: stats.totalFrames,
+      framesDispatched: stats.totalFrames,
       errors: 0,
-      startedAt: null,
+      startedAt: stats.oldestFrame,
       lastError: null,
       frameIntervalMs: Math.round(1000 / 15), // 15 FPS
-      uptimeMs: 0
+      uptimeMs: stats.oldestFrame ? Date.now() - stats.oldestFrame : 0
     },
-    latestFrame: null
+    latestFrame: stats.latestFrame ? {
+      frameNumber: stats.latestFrame.frameNumber,
+      timestamp: stats.latestFrame.timestamp,
+      size: stats.latestFrame.size
+    } : null
   });
 }
 

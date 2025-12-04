@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { storeFrame } from '@/lib/flipdot/frameStore';
 
 export const config = {
   api: {
@@ -19,13 +20,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Extract base64 from data URL if provided
     let base64Data = imageBase64;
+    let finalDataUrl = dataUrl;
+    
     if (!base64Data && typeof dataUrl === 'string') {
       const parts = dataUrl.split(',');
       base64Data = parts.length > 1 ? parts[1] : parts[0];
+      finalDataUrl = dataUrl;
+    } else if (base64Data && !dataUrl) {
+      // Reconstruct data URL if we only have base64
+      finalDataUrl = `data:image/png;base64,${base64Data}`;
     }
 
-    if (!base64Data) {
+    if (!base64Data && !finalDataUrl) {
       return res.status(400).json({ error: 'Missing frame data' });
+    }
+
+    // Store frame for preview
+    if (finalDataUrl) {
+      storeFrame(finalDataUrl, meta);
     }
 
     // TODO: Process frame with flipdot encoder and send to board
@@ -33,12 +45,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('[flipdot] Received frame', {
       frameNumber: meta?.frameNumber,
       timestamp: meta?.timestamp,
-      dataSize: base64Data.length
+      dataSize: base64Data?.length || finalDataUrl?.length
     });
 
     res.json({
       success: true,
-      bytes: Math.ceil(base64Data.length * 0.75), // Approximate decoded size
+      bytes: Math.ceil((base64Data?.length || finalDataUrl?.length) * 0.75), // Approximate decoded size
       transport: 'http',
       meta: meta ?? null
     });

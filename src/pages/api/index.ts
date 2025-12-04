@@ -11,7 +11,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         dashboard: '/dashboard',
         uploads: '/api/uploads',
         flipdot_push_frame: '/api/flipdot/push-frame',
-        flipdot_status: '/api/flipdot/status'
+        flipdot_status: '/api/flipdot/status',
+        flipdot_latest_frame: '/api/flipdot/latest-frame',
+        flipdot_preview: '/flipdot-preview'
       },
       timestamp: new Date().toISOString()
     });
