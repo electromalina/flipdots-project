@@ -7,12 +7,31 @@ export default function FlipdotPreview() {
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  const TARGET_FPS = 15;
+  const FRAME_INTERVAL_MS = Math.round(1000 / TARGET_FPS); // ~67ms
 
   const fetchLatestFrame = async () => {
+    const now = performance.now();
+    
+    // Throttle: don't fetch if called too soon
+    if (now - lastFetchTime < FRAME_INTERVAL_MS) {
+      return;
+    }
+    
+    setLastFetchTime(now);
+
     try {
+      // Add timeout to prevent hangs
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
       const response = await fetch('/api/flipdot/latest-frame', {
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -26,6 +45,10 @@ export default function FlipdotPreview() {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Timeout - don't show error, just skip this fetch
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Failed to fetch frame');
       setFrame(null);
     }
@@ -33,16 +56,24 @@ export default function FlipdotPreview() {
 
   const fetchStats = async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
       const response = await fetch('/api/flipdot/status', {
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       }
     } catch (err) {
-      console.error('Failed to fetch stats', err);
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('Failed to fetch stats', err);
+      }
     }
   };
 
@@ -50,15 +81,34 @@ export default function FlipdotPreview() {
     fetchLatestFrame();
     fetchStats();
 
-    if (autoRefresh) {
-      // Refresh at 15 FPS (every ~67ms) to match casting rate
-      const interval = setInterval(() => {
+    if (!autoRefresh) {
+      return;
+    }
+
+    // Use requestAnimationFrame for smooth, throttled updates
+    let rafId: number;
+    let lastTime = performance.now();
+
+    const updateFrame = (currentTime: number) => {
+      const elapsed = currentTime - lastTime;
+      
+      // Only fetch if enough time has passed (throttle to 15 FPS max)
+      if (elapsed >= FRAME_INTERVAL_MS) {
         fetchLatestFrame();
         fetchStats();
-      }, 67);
+        lastTime = currentTime;
+      }
+      
+      rafId = requestAnimationFrame(updateFrame);
+    };
 
-      return () => clearInterval(interval);
-    }
+    rafId = requestAnimationFrame(updateFrame);
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
   }, [autoRefresh]);
 
   return (

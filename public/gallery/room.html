@@ -1092,9 +1092,15 @@
       running: false,
       sending: false,
       framesSent: 0,
+      frameQueue: [],
+      maxQueueSize: 2, // Max 2 frames in queue to prevent memory issues
       intervalId: null,
+      nextFrameTime: 0,
+      frameInterval: Math.round(1000 / TARGET_FPS), // Exact interval in ms
       captureCanvas: null,
-      captureCtx: null
+      captureCtx: null,
+      lastFrameTimestamp: 0,
+      droppedFrames: 0
     };
 
     // Initialize capture canvas for compositing
@@ -1138,68 +1144,133 @@
       flipdotCastBtn.textContent = '⏹ Stop Casting';
       flipdotStreamState.running = true;
       flipdotStreamState.framesSent = 0;
+      flipdotStreamState.droppedFrames = 0;
+      flipdotStreamState.frameQueue = [];
+      flipdotStreamState.nextFrameTime = performance.now();
+      flipdotStreamState.lastFrameTimestamp = performance.now();
 
-      const tickInterval = Math.max(1, Math.round(1000 / TARGET_FPS));
-      flipdotStreamState.intervalId = setInterval(() => {
-        captureAndDispatchFrame().catch((error) => {
-          console.error('[flipdot] Frame loop failure', error);
-          setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream halted');
-          stopFlipdotStream('Flipdot caster error');
-        });
-      }, tickInterval);
-
-      await captureAndDispatchFrame();
+      // Start the frame loop with precise timing
+      scheduleNextFrame();
       return true;
+    }
+
+    function scheduleNextFrame() {
+      if (!flipdotStreamState.running) {
+        return;
+      }
+
+      const now = performance.now();
+      const elapsed = now - flipdotStreamState.lastFrameTimestamp;
+      
+      // Ensure we never exceed target FPS - wait if needed
+      if (elapsed < flipdotStreamState.frameInterval) {
+        const waitTime = flipdotStreamState.frameInterval - elapsed;
+        flipdotStreamState.intervalId = setTimeout(() => {
+          scheduleNextFrame();
+        }, Math.max(0, waitTime));
+        return;
+      }
+
+      // Update timing for next frame
+      flipdotStreamState.lastFrameTimestamp = now;
+      flipdotStreamState.nextFrameTime = now + flipdotStreamState.frameInterval;
+
+      // Capture frame immediately (synchronous operation)
+      const frameDataUrl = composeFlipdotFrame();
+      
+      if (frameDataUrl) {
+        // Add to queue if not full, otherwise drop oldest
+        if (flipdotStreamState.frameQueue.length >= flipdotStreamState.maxQueueSize) {
+          flipdotStreamState.frameQueue.shift(); // Remove oldest
+          flipdotStreamState.droppedFrames += 1;
+        }
+        
+        flipdotStreamState.frameQueue.push({
+          dataUrl: frameDataUrl,
+          frameNumber: flipdotStreamState.framesSent + 1,
+          timestamp: Date.now()
+        });
+      }
+
+      // Process queue asynchronously (non-blocking)
+      processFrameQueue().catch((error) => {
+        console.error('[flipdot] Frame loop failure', error);
+        setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream halted');
+        stopFlipdotStream('Flipdot caster error');
+      });
+
+      // Schedule next frame capture
+      scheduleNextFrame();
     }
 
     function stopFlipdotStream(message = 'Flipdot stream stopped', { skipStatus = false } = {}) {
       if (!flipdotStreamState.running) {
         return;
       }
-      clearInterval(flipdotStreamState.intervalId);
-      flipdotStreamState.intervalId = null;
+      
+      // Clear timeout/interval
+      if (flipdotStreamState.intervalId) {
+        clearTimeout(flipdotStreamState.intervalId);
+        flipdotStreamState.intervalId = null;
+      }
+      
       flipdotStreamState.running = false;
       flipdotStreamState.sending = false;
+      flipdotStreamState.frameQueue = []; // Clear queue
+      
       if (flipdotCastBtn) {
         flipdotCastBtn.classList.remove('is-active');
         flipdotCastBtn.textContent = '▶️ Cast to Flipdot Board';
       }
+      
       if (!skipStatus) {
+        const droppedInfo = flipdotStreamState.droppedFrames > 0 
+          ? ` (${flipdotStreamState.droppedFrames} dropped)` 
+          : '';
         setFlipdotStatus(
-          `${message} · ${flipdotStreamState.framesSent} frames`,
+          `${message} · ${flipdotStreamState.framesSent} frames${droppedInfo}`,
           'idle',
           `Target: ${TARGET_FPS} FPS`
         );
       }
     }
 
-    async function captureAndDispatchFrame() {
-      if (!flipdotStreamState.running || flipdotStreamState.sending) {
+    async function processFrameQueue() {
+      // Don't process if already sending or queue is empty
+      if (flipdotStreamState.sending || flipdotStreamState.frameQueue.length === 0) {
         return;
       }
 
-      const frameDataUrl = composeFlipdotFrame();
-      if (!frameDataUrl) {
-        throw new Error('Unable to capture canvas');
+      // Get the oldest frame from queue
+      const frame = flipdotStreamState.frameQueue.shift();
+      if (!frame) {
+        return;
       }
 
       flipdotStreamState.sending = true;
 
       try {
         const payload = {
-          dataUrl: frameDataUrl,
+          dataUrl: frame.dataUrl,
           meta: {
             requestedFps: TARGET_FPS,
-            frameNumber: flipdotStreamState.framesSent + 1,
-            timestamp: Date.now()
+            frameNumber: frame.frameNumber,
+            timestamp: frame.timestamp
           }
         };
+
+        // Use AbortController with timeout to prevent hangs
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
         const response = await fetch(`${FLIPDOT_API_BASE}/api/flipdot/push-frame`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorBody = await response.text().catch(() => 'Unknown error');
@@ -1209,9 +1280,13 @@
         const result = await response.json();
         flipdotStreamState.framesSent += 1;
 
+        // Log every second (every 15 frames at 15 FPS)
         if (flipdotStreamState.framesSent % TARGET_FPS === 0) {
+          const droppedInfo = flipdotStreamState.droppedFrames > 0 
+            ? ` (${flipdotStreamState.droppedFrames} dropped)` 
+            : '';
           console.log(
-            `[flipdot] streamed ${flipdotStreamState.framesSent} frames @ ~${TARGET_FPS} FPS`,
+            `[flipdot] streamed ${flipdotStreamState.framesSent} frames @ ${TARGET_FPS} FPS${droppedInfo}`,
             result
           );
         }
@@ -1226,12 +1301,20 @@
           metaLabel
         );
       } catch (error) {
-        console.error('[flipdot] Unable to dispatch frame', error);
-        stopFlipdotStream('Flipdot caster error', { skipStatus: true });
-        setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream halted');
-        throw error;
+        if (error.name === 'AbortError') {
+          console.warn('[flipdot] Frame send timeout, skipping');
+          flipdotStreamState.droppedFrames += 1;
+        } else {
+          console.error('[flipdot] Unable to dispatch frame', error);
+          // Don't stop stream on single frame error, just log it
+          flipdotStreamState.droppedFrames += 1;
+        }
       } finally {
         flipdotStreamState.sending = false;
+        // Continue processing queue if there are more frames
+        if (flipdotStreamState.frameQueue.length > 0) {
+          processFrameQueue();
+        }
       }
     }
 
