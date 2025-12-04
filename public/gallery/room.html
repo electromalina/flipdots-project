@@ -1094,15 +1094,13 @@
       framesSent: 0,
       frameQueue: [],
       maxQueueSize: 2, // Max 2 frames in queue to prevent memory issues
-      intervalId: null,
-      frameInterval: Math.round(1000 / TARGET_FPS), // Exact interval in ms (67ms for 15 FPS)
+      timeoutId: null,
+      frameInterval: 1000 / TARGET_FPS, // Exact interval in ms (66.666...ms for 15 FPS)
       captureCanvas: null,
       captureCtx: null,
-      lastFrameTimestamp: 0,
+      nextFrameTime: 0,
       droppedFrames: 0,
-      nextFrameNumber: 1,
-      frameCountForFps: 0,
-      fpsStartTime: 0
+      nextFrameNumber: 1
     };
 
     // Initialize capture canvas for compositing
@@ -1141,7 +1139,7 @@
       }
 
       console.log('[flipdot] Starting live stream @', TARGET_FPS, 'FPS');
-      console.log('[flipdot] Frame interval:', flipdotStreamState.frameInterval, 'ms');
+      console.log('[flipdot] Frame interval:', flipdotStreamState.frameInterval.toFixed(2), 'ms');
       setFlipdotStatus('Starting flipdot stream...', 'pending', `Target: ${TARGET_FPS} FPS`);
       flipdotCastBtn.classList.add('is-active');
       flipdotCastBtn.textContent = '⏹ Stop Casting';
@@ -1149,68 +1147,61 @@
       flipdotStreamState.framesSent = 0;
       flipdotStreamState.droppedFrames = 0;
       flipdotStreamState.frameQueue = [];
-      flipdotStreamState.lastFrameTimestamp = performance.now();
       flipdotStreamState.nextFrameNumber = 1;
-      flipdotStreamState.frameCountForFps = 0;
-      flipdotStreamState.fpsStartTime = performance.now();
+      flipdotStreamState.nextFrameTime = performance.now();
 
-      // Use setInterval for stable, predictable timing at exactly 15 FPS
-      // This is simpler and more reliable than recursive setTimeout
-      flipdotStreamState.intervalId = setInterval(() => {
-        if (!flipdotStreamState.running) {
-          return;
-        }
-
-        const now = performance.now();
-        const elapsed = now - flipdotStreamState.lastFrameTimestamp;
-        
-        // Safety check: if somehow we're running too fast, skip this tick
-        if (elapsed < flipdotStreamState.frameInterval * 0.9) {
-          return; // Skip this frame to maintain rate
-        }
-
-        // Update timing
-        flipdotStreamState.lastFrameTimestamp = now;
-        
-        // Track FPS for monitoring
-        flipdotStreamState.frameCountForFps++;
-        const fpsElapsed = now - flipdotStreamState.fpsStartTime;
-        if (fpsElapsed >= 1000) {
-          const actualFps = Math.round((flipdotStreamState.frameCountForFps / fpsElapsed) * 1000);
-          if (actualFps > TARGET_FPS + 1) {
-            console.warn(`[flipdot] FPS too high: ${actualFps} (target: ${TARGET_FPS})`);
-          }
-          flipdotStreamState.frameCountForFps = 0;
-          flipdotStreamState.fpsStartTime = now;
-        }
-
-        // Capture frame immediately (synchronous operation)
-        const frameDataUrl = composeFlipdotFrame();
-        
-        if (frameDataUrl) {
-          // Add to queue if not full, otherwise drop oldest
-          if (flipdotStreamState.frameQueue.length >= flipdotStreamState.maxQueueSize) {
-            flipdotStreamState.frameQueue.shift(); // Remove oldest
-            flipdotStreamState.droppedFrames += 1;
-          }
-          
-          flipdotStreamState.frameQueue.push({
-            dataUrl: frameDataUrl,
-            frameNumber: flipdotStreamState.nextFrameNumber++,
-            timestamp: Date.now()
-          });
-        }
-
-        // Process queue asynchronously (non-blocking) - don't await
-        if (!flipdotStreamState.sending) {
-          processFrameQueue().catch((error) => {
-            console.error('[flipdot] Frame queue processing error', error);
-            // Don't stop stream on single error, just log it
-          });
-        }
-      }, flipdotStreamState.frameInterval);
+      // Start the frame loop - no intervals, just precise timing
+      captureAndScheduleNext();
 
       return true;
+    }
+
+    function captureAndScheduleNext() {
+      if (!flipdotStreamState.running) {
+        return;
+      }
+
+      const now = performance.now();
+      
+      // Capture frame immediately (synchronous operation)
+      const frameDataUrl = composeFlipdotFrame();
+      
+      if (frameDataUrl) {
+        // Add to queue if not full, otherwise drop oldest
+        if (flipdotStreamState.frameQueue.length >= flipdotStreamState.maxQueueSize) {
+          flipdotStreamState.frameQueue.shift(); // Remove oldest
+          flipdotStreamState.droppedFrames += 1;
+        }
+        
+        flipdotStreamState.frameQueue.push({
+          dataUrl: frameDataUrl,
+          frameNumber: flipdotStreamState.nextFrameNumber++,
+          timestamp: Date.now()
+        });
+      }
+
+      // Process queue asynchronously (non-blocking) - don't await
+      if (!flipdotStreamState.sending) {
+        processFrameQueue().catch((error) => {
+          console.error('[flipdot] Frame queue processing error', error);
+          // Don't stop stream on single error, just log it
+        });
+      }
+
+      // Calculate when next frame should be captured
+      flipdotStreamState.nextFrameTime += flipdotStreamState.frameInterval;
+      
+      // Calculate wait time until next frame
+      const waitTime = flipdotStreamState.nextFrameTime - performance.now();
+      
+      // Schedule next frame capture - wait exactly the right amount
+      if (waitTime > 0) {
+        flipdotStreamState.timeoutId = setTimeout(captureAndScheduleNext, waitTime);
+      } else {
+        // If we're behind schedule, catch up immediately but adjust next frame time
+        flipdotStreamState.nextFrameTime = now + flipdotStreamState.frameInterval;
+        flipdotStreamState.timeoutId = setTimeout(captureAndScheduleNext, flipdotStreamState.frameInterval);
+      }
     }
 
     function stopFlipdotStream(message = 'Flipdot stream stopped', { skipStatus = false } = {}) {
@@ -1218,10 +1209,10 @@
         return;
       }
       
-      // Clear interval
-      if (flipdotStreamState.intervalId) {
-        clearInterval(flipdotStreamState.intervalId);
-        flipdotStreamState.intervalId = null;
+      // Clear timeout
+      if (flipdotStreamState.timeoutId) {
+        clearTimeout(flipdotStreamState.timeoutId);
+        flipdotStreamState.timeoutId = null;
       }
       
       flipdotStreamState.running = false;

@@ -7,20 +7,10 @@ export default function FlipdotPreview() {
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
   const TARGET_FPS = 15;
-  const FRAME_INTERVAL_MS = Math.round(1000 / TARGET_FPS); // ~67ms
+  const FRAME_INTERVAL_MS = 1000 / TARGET_FPS; // 66.666...ms for exact 15 FPS
 
   const fetchLatestFrame = async () => {
-    const now = performance.now();
-    
-    // Throttle: don't fetch if called too soon
-    if (now - lastFetchTime < FRAME_INTERVAL_MS) {
-      return;
-    }
-    
-    setLastFetchTime(now);
-
     try {
       // Add timeout to prevent hangs
       const controller = new AbortController();
@@ -85,28 +75,36 @@ export default function FlipdotPreview() {
       return;
     }
 
-    // Use requestAnimationFrame for smooth, throttled updates
-    let rafId: number;
-    let lastTime = performance.now();
+    // Simple setTimeout loop for exact 15 FPS - no intervals, no requestAnimationFrame
+    let timeoutId: NodeJS.Timeout;
+    let nextFetchTime = performance.now();
 
-    const updateFrame = (currentTime: number) => {
-      const elapsed = currentTime - lastTime;
-      
-      // Only fetch if enough time has passed (throttle to 15 FPS max)
-      if (elapsed >= FRAME_INTERVAL_MS) {
-        fetchLatestFrame();
-        fetchStats();
-        lastTime = currentTime;
+    const scheduleNext = () => {
+      if (!autoRefresh) {
+        return;
       }
+
+      fetchLatestFrame();
+      fetchStats();
+
+      // Calculate next fetch time
+      nextFetchTime += FRAME_INTERVAL_MS;
+      const waitTime = nextFetchTime - performance.now();
       
-      rafId = requestAnimationFrame(updateFrame);
+      if (waitTime > 0) {
+        timeoutId = setTimeout(scheduleNext, waitTime);
+      } else {
+        // If behind schedule, catch up
+        nextFetchTime = performance.now() + FRAME_INTERVAL_MS;
+        timeoutId = setTimeout(scheduleNext, FRAME_INTERVAL_MS);
+      }
     };
 
-    rafId = requestAnimationFrame(updateFrame);
+    timeoutId = setTimeout(scheduleNext, FRAME_INTERVAL_MS);
 
     return () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
   }, [autoRefresh]);
