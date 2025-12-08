@@ -53,10 +53,8 @@
       /* 84px * 10 scale factor */
       height: 280px;
       /* 28px * 10 scale factor */
-      border: 2px solid #333;
-      /* Flipboard-style border */
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      /* Subtle depth effect */
+      border: 2px solid #04626C;
+      /* Primary color border */
       margin: 0 auto;
       image-rendering: pixelated;
       /* Crisp pixel rendering */
@@ -103,31 +101,19 @@
       pointer-events: none;
     }
 
-    /* Development minimap */
+    /* Development minimap - aligned with canvas height */
     #mini {
       image-rendering: pixelated;
       width: 280px;
       height: 280px;
-      background: #222;
-      border: 2px solid #333;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      background: #000;
+      border: 2px solid #04626C;
       flex-shrink: 0;
-    }
-
-    /* Minimap container with legend */
-    .minimap-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      flex: 0 0 auto;
-      max-height: 30%;
     }
 
     .minimap-legend {
       background: #000;
-      border: 2px solid #fff;
+      border: 2px solid #04626C;
       padding: 16px 20px;
       font-size: 0.9em;
       color: #ccc;
@@ -139,7 +125,7 @@
     }
 
     .minimap-legend strong {
-      color: #fff;
+      color: #04626C;
       display: block;
       margin-bottom: 10px;
       font-size: 1.05em;
@@ -149,208 +135,226 @@
       margin: 6px 0;
     }
 
-    /* Ensure minimap canvas is properly sized */
-    #mini {
-      width: 100%;
-      max-width: 240px;
-      height: auto;
-      aspect-ratio: 1;
-    }
 
     /* Center layout and flipboard theme */
-    body {
+    html, body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #000;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      min-height: 100vh;
-      background: #000;
-      font-family: 'Courier New', monospace;
-      color: #fff;
-      position: relative;
     }
 
     /* Main content wrapper */
     .main-content {
       width: 100%;
-      max-width: 1800px;
-      margin: 0 auto;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 20px;
-    }
-
-    /* Flipboard dot matrix effect */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image:
-        radial-gradient(circle at center, #222 1px, transparent 1px);
-      background-size: 12px 12px;
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-      border: 2px solid #fff;
-      padding: 28px 40px;
-      background: #000;
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 1800px;
+      padding: 10px;
       box-sizing: border-box;
     }
 
-    .header h1 {
-      font-size: 2.5em;
-      margin: 0;
-      color: #fff;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      letter-spacing: 2px;
-      font-weight: bold;
+    /* Header / Logo */
+    .header {
+      text-align: center;
+      flex-shrink: 0;
+      padding: 10px 0;
+      box-sizing: border-box;
     }
 
-    .header p {
-      margin: 10px 0;
-      color: #ccc;
-      font-size: 1.1em;
+    .header img {
+      max-width: 250px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
     }
 
-    /* Game container - 3 columns */
+    /* Main game container - minimap left, canvas right */
     .game-container {
-      display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      grid-template-rows: 1fr;
-      gap: 24px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 1800px;
-      height: calc(100vh - 280px);
-      min-height: 600px;
-      max-height: 800px;
-      align-items: stretch;
-      padding: 0 20px;
-    }
-
-    /* Left panel (controls + minimap) */
-    .left-panel {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      gap: 20px;
       width: 100%;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      box-sizing: border-box;
       overflow: hidden;
     }
 
-    /* Game area (center - most important) */
+    /* Minimap on the left */
+    .minimap-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    /* Game area with canvas on the right */
     .game-area {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
+      flex: 0 0 auto;
     }
 
-    /* Stage container for better alignment */
+    /* Stage container */
     .stage-wrapper {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+    }
+
+    /* Accordion container below canvas area */
+    .accordion-container {
+      position: relative;
       width: 100%;
-      height: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      padding: 0 10px;
+      margin-top: 20px;
+      box-sizing: border-box;
+      align-items: flex-start;
+    }
+
+    /* Accordion item */
+    .accordion-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #000;
+      border: 2px solid #04626C;
+      overflow: hidden;
+      max-width: 50%;
+    }
+
+    .accordion-header {
+      background: #000;
+      padding: 12px 16px;
+      color: #04626C;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1em;
+      font-weight: bold;
+      flex-shrink: 0;
+      border-bottom: 1px solid transparent;
+      transition: border-bottom-color 0.2s ease;
+    }
+
+    .accordion-header .header-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accordion-header .status-badge {
+      font-size: 0.85em;
+      color: #999;
+      font-weight: normal;
+    }
+
+    .accordion-item.expanded .accordion-header {
+      border-bottom-color: #04626C;
+    }
+
+    .accordion-toggle {
+      color: #04626C;
+      font-size: 0.9em;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .accordion-item.expanded .accordion-toggle {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 1;
+      min-height: 0;
+    }
+
+
+    .accordion-body {
+      padding: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 300px;
+      box-sizing: border-box;
+    }
+
+    /* Custom scrollbar for accordion */
+    .accordion-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .accordion-body::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    .accordion-body::-webkit-scrollbar-thumb {
+      background: #333;
+      border: 1px solid #04626C;
     }
 
     /* Controls panel */
     .controls {
       background: #000;
-      padding: 16px;
-      border: 2px solid #fff;
+      padding: 0;
       width: 100%;
-      position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
-      flex: 0 0 auto;
-      max-height: 45%;
     }
 
     .controls h3 {
       margin-top: 0;
       margin-bottom: 10px;
-      color: #fff;
-      font-size: 1.1em;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      color: #04626C;
+      font-size: 0.95em;
       padding-bottom: 8px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #04626C;
     }
 
     .controls h3:not(:first-child) {
       margin-top: 16px;
     }
 
-    /* Uploads sidebar (right side) */
-    .uploads-sidebar {
+    /* Uploads section */
+    .uploads-section {
       background: #000;
-      padding: 16px;
-      border: 2px solid #fff;
+      padding: 0;
       width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-    }
-
-    .uploads-sidebar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(90deg,
-          transparent,
-          transparent 8px,
-          rgba(255, 255, 255, 0.02) 8px,
-          rgba(255, 255, 255, 0.02) 16px);
-      pointer-events: none;
-    }
-
-    .uploads-sidebar h3 {
-      margin-top: 0;
-      color: #fff;
-      font-size: 1.1em;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid #333;
-      padding-bottom: 10px;
-      margin-bottom: 12px;
-      flex-shrink: 0;
+      min-height: 0;
     }
 
     .uploads-list {
       overflow-y: auto;
       flex: 1;
-      position: relative;
-      z-index: 1;
+      min-height: 0;
     }
 
     .uploads-list::-webkit-scrollbar {
@@ -363,44 +367,32 @@
 
     .uploads-list::-webkit-scrollbar-thumb {
       background: #333;
-      border: 1px solid #666;
-    }
-
-    .uploads-list::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      border: 1px solid #04626C;
     }
 
     .upload-item {
-      background: #111;
+      background: #000;
       border: 1px solid #333;
       padding: 12px;
       margin-bottom: 10px;
-      transition: all 0.2s ease;
       position: relative;
-      border-radius: 2px;
-    }
-
-    .upload-item:hover {
-      border-color: #fff;
-      background: #1a1a1a;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
 
     .upload-item.loading {
       text-align: center;
-      color: #888;
-      border-color: #666;
+      color: #666;
+      border-color: #333;
     }
 
     .upload-item.empty {
       text-align: center;
       color: #666;
-      border-color: #444;
+      border-color: #333;
       font-style: italic;
     }
 
     .upload-item .repo-name {
-      color: #fff;
+      color: #04626C;
       font-weight: bold;
       margin-bottom: 8px;
       font-size: 0.95em;
@@ -412,27 +404,10 @@
     }
 
     .minimap-color-indicator {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 2px solid;
+      width: 14px;
+      height: 14px;
+      border: 1px solid;
       flex-shrink: 0;
-      box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: 0.8;
-        transform: scale(1.1);
-      }
     }
 
     .upload-item .repo-info {
@@ -441,49 +416,24 @@
       gap: 6px;
       margin-bottom: 8px;
       font-size: 0.75em;
-      color: #ccc;
+      color: #999;
     }
 
     .upload-item .repo-info span {
       background: #000;
       padding: 3px 6px;
-      border: 1px solid #444;
-      border-radius: 2px;
+      border: 1px solid #333;
     }
 
     .upload-item .github-link {
       display: inline-block;
-      color: #fff;
+      color: #04626C;
       text-decoration: none;
-      border: 1px solid #fff;
+      border: 1px solid #04626C;
       padding: 6px 12px;
       font-size: 0.85em;
-      transition: all 0.2s ease;
       margin-top: 6px;
-      border-radius: 2px;
     }
-
-    .upload-item .github-link:hover {
-      background: #fff;
-      color: #000;
-    }
-
-    .controls::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(90deg,
-          transparent,
-          transparent 8px,
-          rgba(255, 255, 255, 0.02) 8px,
-          rgba(255, 255, 255, 0.02) 16px);
-      pointer-events: none;
-    }
-
 
     .controls ul {
       list-style: none;
@@ -494,8 +444,6 @@
     .controls li {
       padding: 4px 0;
       color: #ccc;
-      position: relative;
-      z-index: 1;
       line-height: 1.4;
       font-size: 0.9em;
     }
@@ -503,54 +451,15 @@
     .controls .key {
       background: #000;
       padding: 2px 6px;
-      border: 1px solid #fff;
+      border: 1px solid #04626C;
       font-weight: bold;
-      color: #fff;
+      color: #04626C;
       margin-right: 8px;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
 
-    /* Status panel */
+    /* Status panel - minimal inline */
     .status {
-      background: #000;
-      padding: 20px 28px;
-      border: 2px solid #fff;
-      text-align: center;
-      margin-bottom: 32px;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      max-width: 1800px;
-      box-sizing: border-box;
-    }
-
-    .status::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 51%);
-      background-size: 8px 8px;
-      pointer-events: none;
-    }
-
-    .status h3 {
-      margin: 0 0 10px 0;
-      color: #fff;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-    }
-
-    #galleryStatus {
-      color: #fff;
-      font-weight: bold;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+      display: none;
     }
 
     /* Loading indicator */
@@ -563,7 +472,6 @@
       font-family: monospace;
       font-size: 18px;
       text-align: center;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     }
 
     .loading::after {
@@ -592,147 +500,31 @@
       }
     }
 
-    /* Navigation */
-    .nav {
-      margin-top: 40px;
-      text-align: center;
-      width: 100%;
-      max-width: 1800px;
-      padding: 0 20px;
-    }
-
-    .nav a {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 0 10px;
-      background: #000;
-      color: #fff;
-      text-decoration: none;
-      border: 2px solid #fff;
-      font-weight: bold;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      font-family: 'Courier New', monospace;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-      image-rendering: pixelated;
-    }
-
-    .nav a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(90deg,
-          transparent,
-          transparent 4px,
-          rgba(255, 255, 255, 0.05) 4px,
-          rgba(255, 255, 255, 0.05) 8px);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    .nav a:hover {
-      background: #fff;
-      color: #000;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      text-shadow: none;
-    }
-
-    .nav a:hover::before {
-      transform: translateX(0);
-      background:
-        repeating-linear-gradient(90deg,
-          transparent,
-          transparent 4px,
-          rgba(0, 0, 0, 0.05) 4px,
-          rgba(0, 0, 0, 0.05) 8px);
-    }
 
     /* Responsive design */
-    @media (max-width: 1500px) {
-      .game-container {
-        grid-template-columns: 260px 1fr 280px;
-        gap: 20px;
-        height: calc(100vh - 260px);
-      }
-    }
-
-    @media (max-width: 1400px) {
-      .game-container {
-        grid-template-columns: 240px 1fr 260px;
-        gap: 18px;
-        height: calc(100vh - 240px);
-      }
-    }
-
     @media (max-width: 1200px) {
       .game-container {
-        grid-template-columns: 220px 1fr 240px;
-        gap: 16px;
-        height: calc(100vh - 220px);
-      }
-
-      .controls {
-        padding: 12px;
-        max-height: 40%;
-      }
-
-      .controls h3 {
-        font-size: 1em;
-        margin-bottom: 8px;
-      }
-
-      .controls li {
-        font-size: 0.85em;
-        padding: 3px 0;
+        gap: 12px;
       }
 
       #mini {
+        width: 240px;
+        height: 240px;
+      }
+
+      .header img {
         max-width: 200px;
       }
     }
 
     @media (max-width: 900px) {
       .game-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        height: auto;
-        min-height: auto;
-        max-height: none;
+        flex-direction: column;
+        gap: 10px;
       }
 
-      .left-panel {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        height: auto;
-      }
-
-      .controls {
-        max-height: none;
-      }
-
-      .minimap-container {
-        max-height: none;
-      }
-
-      .uploads-sidebar {
-        grid-column: 1 / -1;
-        height: 300px;
-      }
-
-      .game-area {
-        height: 400px;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .left-panel {
-        grid-template-columns: 1fr;
+      .accordion-container {
+        flex-direction: column;
       }
 
       /* Scale down to 7.5x (maintains 3:1 aspect ratio) */
@@ -752,19 +544,16 @@
         width: 630px;
         height: 210px;
       }
+
+      #mini {
+        width: 200px;
+        height: 200px;
+      }
     }
 
     @media (max-width: 700px) {
-      body {
-        padding: 12px;
-      }
-
-      .header {
-        padding: 16px;
-      }
-
-      .header h1 {
-        font-size: 2em;
+      .header img {
+        max-width: 150px;
       }
 
       /* Scale down to 5x (maintains 3:1 aspect ratio) */
@@ -786,13 +575,8 @@
       }
 
       #mini {
-        width: 240px;
-        height: 240px;
-      }
-
-      .minimap-legend {
-        font-size: 0.75em;
-        padding: 10px 12px;
+        width: 180px;
+        height: 180px;
       }
     }
   </style>
@@ -801,39 +585,14 @@
 <body>
   <div class="main-content">
     <div class="header">
-      <h1>🎨 Flipboard Gallery Room</h1>
-      <p>Your Slack API uploads transformed into interactive 3D paintings!</p>
-    </div>
-
-    <div class="status">
-      <h3>🖼️ Gallery Status</h3>
-      <div id="galleryStatus">Loading paintings...</div>
+      <img src="./logo.png" alt="Flipboard Gallery Room" />
     </div>
 
     <div class="game-container">
-      <div class="left-panel">
-        <div class="controls">
-          <h3>🎮 Controls</h3>
-          <ul>
-            <li><span class="key">WASD</span> Move around</li>
-            <li><span class="key">Q/E</span> Turn left/right</li>
-            <li><span class="key">↑↓←→</span> Alternative movement</li>
-          </ul>
-
-          <h3>🖼️ Gallery</h3>
-          <ul>
-            <li>🔍 Look closely at paintings to trigger them</li>
-            <li>🔗 Paintings open GitHub repository links</li>
-            <li>🔄 Gallery auto-updates every 30 seconds</li>
-            <li>📱 Up to 6 most recent uploads displayed</li>
-          </ul>
-        </div>
-
-        <div class="minimap-container">
-          <canvas id="mini" width="128" height="128"
-            title="Minimap - Colored dots show your gallery paintings"></canvas>
-          <div class="minimap-legend"></div>
-        </div>
+      <div class="minimap-container">
+        <canvas id="mini" width="128" height="128"
+          title="Minimap - Colored dots show your gallery paintings"></canvas>
+        <div class="minimap-legend"></div>
       </div>
 
       <div class="game-area">
@@ -846,21 +605,57 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="uploads-sidebar">
-        <h3>📋 All Uploads</h3>
-        <div id="uploadsList" class="uploads-list">
-          <div class="upload-item loading">Loading uploads...</div>
+    <div class="accordion-container">
+      <div class="accordion-item" id="controlsAccordion">
+        <div class="accordion-header" id="controlsHeader">
+          <span>Controls</span>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="controls">
+              <h3>Movement</h3>
+              <ul>
+                <li><span class="key">WASD</span> Move around</li>
+                <li><span class="key">Q/E</span> Turn left/right</li>
+                <li><span class="key">↑↓←→</span> Alternative movement</li>
+              </ul>
+
+              <h3>Gallery</h3>
+              <ul>
+                <li>Look closely at paintings to trigger them</li>
+                <li>Paintings open GitHub repository links</li>
+                <li>Gallery auto-updates every 30 seconds</li>
+                <li>Up to 6 most recent uploads displayed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="uploadsAccordion">
+        <div class="accordion-header" id="uploadsHeader">
+          <span class="header-text">
+            <span>All Uploads</span>
+            <span class="status-badge" id="uploadsStatusBadge"></span>
+          </span>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="uploads-section">
+              <div id="uploadsList" class="uploads-list">
+                <div class="upload-item loading">Loading uploads...</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="nav">
-    <a href="dashboard.html">📊 Dashboard</a>
-    <a href="./">🔧 API Info</a>
-    <a href="uploads">📋 View JSON Data</a>
-  </div>
 
   <!-- Three.js for hardware acceleration -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
@@ -885,7 +680,6 @@
     const post = document.getElementById('post');
     const mini = document.getElementById('mini');
     const loading = document.getElementById('loading');
-    const galleryStatus = document.getElementById('galleryStatus');
     const uploadsList = document.getElementById('uploadsList');
 
     // Initialize the rendering engine
@@ -950,10 +744,14 @@
     setupController();
 
 
-    // Update gallery status
+    // Update gallery status (in accordion badge only)
     function updateGalleryStatus() {
       const count = getGalleryFrameCount();
-      galleryStatus.textContent = `${count} paintings loaded from API`;
+      // Update accordion badge
+      const uploadsStatusBadge = document.getElementById('uploadsStatusBadge');
+      if (uploadsStatusBadge) {
+        uploadsStatusBadge.textContent = `(${count} paintings)`;
+      }
     }
 
     // Update status initially and periodically
@@ -1009,11 +807,11 @@
               <span>${repoName}</span>
             </div>
             <div class="repo-info">
-              <span>🌿 ${branch}</span>
-              <span>👤 ${userName}</span>
-              <span>📅 ${timestamp}</span>
+              <span>${branch}</span>
+              <span>${userName}</span>
+              <span>${timestamp}</span>
             </div>
-            <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">🔗 View on GitHub</a>
+            <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">View on GitHub</a>
           </div>
         `;
       }).join('');
@@ -1088,6 +886,50 @@
 
       // Schedule next frame
       requestAnimationFrame(gameLoop);
+    }
+
+    // =============================================================================
+    // ACCORDION TOGGLE
+    // =============================================================================
+
+    function setupAccordion(headerId, accordionId) {
+      const header = document.getElementById(headerId);
+      const accordion = document.getElementById(accordionId);
+      const content = accordion?.querySelector('.accordion-content');
+      const body = content?.querySelector('.accordion-body');
+
+      if (header && accordion && content && body) {
+        // Set initial state
+        content.style.maxHeight = '0px';
+        
+        header.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const isExpanded = accordion.classList.contains('expanded');
+          
+          if (isExpanded) {
+            // Collapse
+            accordion.classList.remove('expanded');
+            content.style.maxHeight = '0px';
+          } else {
+            // Expand - use fixed max-height to prevent page expansion
+            accordion.classList.add('expanded');
+            content.style.maxHeight = '300px';
+          }
+        });
+      }
+    }
+
+    // Initialize accordions after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setupAccordion('controlsHeader', 'controlsAccordion');
+        setupAccordion('uploadsHeader', 'uploadsAccordion');
+      });
+    } else {
+      setupAccordion('controlsHeader', 'controlsAccordion');
+      setupAccordion('uploadsHeader', 'uploadsAccordion');
     }
 
     // =============================================================================
