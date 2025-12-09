@@ -672,7 +672,7 @@
     <div class="accordion-container">
       <div class="accordion-item" id="controlsAccordion">
         <div class="accordion-header" id="controlsHeader">
-          <span>Controls</span>
+          <span>Controls and FLipdot Casting</span>
           <span class="accordion-toggle">▼</span>
         </div>
         <div class="accordion-content">
@@ -692,6 +692,27 @@
                 <li>Gallery auto-updates every 30 seconds</li>
                 <li>Up to 6 most recent uploads displayed</li>
               </ul>
+
+              <h3>Flipdot Casting</h3>
+              <div style="margin-top: 12px;">
+                <button id="castButton" style="
+                  background: #04626C;
+                  color: #fff;
+                  border: 2px solid #04626C;
+                  padding: 10px 20px;
+                  font-size: 1em;
+                  font-weight: bold;
+                  cursor: pointer;
+                  font-family: 'Courier New', monospace;
+                  border-radius: 4px;
+                  transition: all 0.3s ease;
+                ">Start Casting</button>
+                <div id="castStatus" style="
+                  margin-top: 8px;
+                  font-size: 0.85em;
+                  color: #999;
+                ">Ready to cast</div>
+              </div>
             </div>
           </div>
         </div>
@@ -859,6 +880,12 @@
     // Initialize accordions after DOM is ready
     setupAccordions();
 
+    // Setup casting button
+    const castButton = document.getElementById('castButton');
+    if (castButton) {
+      castButton.addEventListener('click', toggleCasting);
+    }
+
     // =============================================================================
     // UPLOADS SIDEBAR
     // =============================================================================
@@ -934,6 +961,86 @@
     }, 30000);
 
     // =============================================================================
+    // FLIPDOT CASTING
+    // =============================================================================
+
+    let isCasting = false;
+    let lastFrameSent = 0;
+    let frameCounter = 0;
+    const CAST_FPS = 15;
+    const CAST_INTERVAL_MS = 1000 / CAST_FPS; // ~66.67ms for 15 FPS
+
+    async function sendFrameToFlipdot() {
+      if (!isCasting) return;
+
+      try {
+        // Get the main canvas (post canvas has the overlay)
+        const mainCanvas = document.getElementById('v');
+        const postCanvas = document.getElementById('post');
+        
+        // Create a combined canvas with both layers
+        const combinedCanvas = document.createElement('canvas');
+        combinedCanvas.width = mainCanvas.width;
+        combinedCanvas.height = mainCanvas.height;
+        const ctx = combinedCanvas.getContext('2d');
+        
+        // Draw main canvas first
+        ctx.drawImage(mainCanvas, 0, 0);
+        // Then draw overlay on top
+        ctx.drawImage(postCanvas, 0, 0);
+        
+        const dataUrl = combinedCanvas.toDataURL('image/png');
+        frameCounter++;
+
+        const response = await fetch('/api/flipdot/push-frame', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            dataUrl: dataUrl,
+            meta: {
+              frameNumber: frameCounter,
+              timestamp: new Date().toISOString(),
+              source: 'gallery-room'
+            }
+          })
+        });
+
+        if (!response.ok) {
+          console.warn('Failed to send frame to flipdot API');
+        }
+      } catch (error) {
+        console.error('Error sending frame:', error);
+      }
+    }
+
+    function toggleCasting() {
+      isCasting = !isCasting;
+      frameCounter = 0;
+      
+      const button = document.getElementById('castButton');
+      const status = document.getElementById('castStatus');
+      
+      if (button && status) {
+        if (isCasting) {
+          button.textContent = 'Stop Casting';
+          button.style.background = '#e74c3c';
+          status.textContent = 'Casting to flipdot...';
+          status.style.color = '#27ae60';
+          console.log('🎬 Started casting to flipdot');
+        } else {
+          button.textContent = 'Start Casting';
+          button.style.background = '#04626C';
+          status.textContent = 'Casting stopped';
+          status.style.color = '#999';
+          console.log('⏹️ Stopped casting');
+        }
+      }
+    }
+
+
+    // =============================================================================
     // GAME LOOP
     // =============================================================================
 
@@ -981,6 +1088,12 @@
           const dataUrl = miniCanvas.toDataURL("image/png");
           window.controllerSocket.emit('minimap_frame', dataUrl);
         }
+      }
+
+      // SEND FRAME TO FLIPDOT API @ 15fps when casting
+      if (isCasting && now - lastFrameSent >= CAST_INTERVAL_MS) {
+        lastFrameSent = now;
+        sendFrameToFlipdot();
       }
 
 
