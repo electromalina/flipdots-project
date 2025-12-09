@@ -62,4 +62,9 @@ io.on('connection', socket => {
 });
 
 // Start the server on port 4000
-server.listen(4000, () => console.log('controller at http://localhost:4000'));
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, () => {
+  console.log('Controller running on port', PORT);
+});
+

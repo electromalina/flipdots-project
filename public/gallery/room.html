@@ -34,21 +34,27 @@
   -->
   <!-- Socket.io for controller (optional - only loads if localhost:4000 available) -->
   <script>
-    // Try to load socket.io from local flipdot-caster service
+    const CONTROLLER_URL = location.hostname === "localhost"
+      ? "http://localhost:4000"
+      : "https://flipdot-controller.onrender.com";
+  
     const socketScript = document.createElement('script');
-    socketScript.src = 'http://localhost:4000/socket.io/socket.io.js';
+    socketScript.src = `${CONTROLLER_URL}/socket.io/socket.io.js`;
     socketScript.async = true;
+  
     socketScript.onerror = () => {
-      console.log('⚠️ Socket.io not available - flipdot-caster not running');
+      console.log('⚠️ Controller not reachable');
       window._controllerIO = null;
     };
+  
     socketScript.onload = () => {
-      console.log('✓ Socket.io connected');
+      console.log('✓ Controller socket loaded');
       window._controllerIO = window.io;
     };
+  
     document.head.appendChild(socketScript);
   </script>
-
+  
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <!-- Favicon - emoji as data URI to avoid 404 -->
@@ -755,8 +761,9 @@
         return;
       }
 
+      const CONTROLLER_URL = window.CONTROLLER_URL || "http://localhost:4000";
+      const socket = ioFn(CONTROLLER_URL);
       // Connect to controller server
-      const socket = ioFn("http://localhost:4000");
       window.controllerSocket = socket; // For debugging
 
       console.log("📱 Controller connected");
@@ -890,7 +897,7 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
-    function gameLoop(now) {
+     function gameLoop(now) {
       const dt = Math.min((now - last) / 1000, 0.016); // Cap dt to 16ms
       last = now;
 
