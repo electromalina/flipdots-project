@@ -6,36 +6,36 @@ export default function Features() {
       title: "1: Data Sources and Widget Development",
       description:
         "We pull in real-time data from various sources — whether it's the current weather, your favorite Spotify track, or fun mini-games. Each source becomes a widget that turns information into something you can see and interact with.",
-      icon: "/data-science.svg",
+      icon: "/assets/data-2-svgrepo-com (1).png",
     },
     {
       title: "2. Widgets in the 3D Room",
       description:
         "These widgets come alive as digital paintings hanging in our 3D gallery space. Think of it like walking through an art museum where each wall tells a different story — one might show your music, another displays the weather, all creating a unique visual experience.",
-      icon: "/grid.svg",
+      icon: "/assets/widget-5-svgrepo-com.png",
     },
     {
       title: "3. Rendering Frames",
       description:
         "The gallery is continuously rendered into frames of dot patterns. These frames translate the 3D space into a low-resolution pixel grid matching the flipdot display.",
-      icon: "/spinner.svg",
+      icon: "/assets/frames-svgrepo-com.png",
     },
     {
       title: "4. Flipdot Controller",
       description:
         "Each frame is sent to the controller, which uses electromagnets to physically flip dots on the flipdot wall, updating in real time.",
-      icon: "/technology.svg",
+      icon: "/assets/controller-device-svgrepo-com.png",
     },
     {
       title: "5. Physical Display",
       description:
         "The virtual paintings in the room become tangible dot-based visuals on the flipdot installation — bridging digital imagination with physical interaction.",
-      icon: "/sparkles-solid.svg",
+      icon: "/assets/flipboard-svgrepo-com.png",
     },
   ];
 
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="mb-16 flex justify-start">
@@ -63,9 +63,9 @@ export default function Features() {
                     <Image 
                       src={feature.icon} 
                       alt={feature.title}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6"
+                      width={32}
+                      height={32}
+                      className="w-8 h-8 object-contain"
                     />
                   </div>
                   
@@ -96,9 +96,9 @@ export default function Features() {
                     <Image 
                       src={feature.icon} 
                       alt={feature.title}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6"
+                      width={32}
+                      height={32}
+                      className="w-8 h-8 object-contain"
                     />
                   </div>
                   
