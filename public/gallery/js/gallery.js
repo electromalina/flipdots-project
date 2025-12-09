@@ -418,40 +418,23 @@ console.log('🎨 Gallery module exports ready:', {
 // =============================================================================
 
 async function triggerRepoDownload(githubUrl) {
-  const endpoints = [
-    '/download-repo',
-    './download-repo',
-    'download-repo',
-    'https://i558110.hera.fontysict.net/api-testing/download-repo'
-  ];
-  let lastError = null;
-  for (const ep of endpoints) {
-    try {
-      console.log(`⬇️ Triggering download via ${ep} for ${githubUrl}`);
-      const res = await fetch(ep, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ url: githubUrl })
-      });
-      const json = await res.json().catch(() => ({}));
-      console.log(`📡 Response from ${ep}:`, { status: res.status, ok: res.ok, json });
-
-      if (res.ok && json && json.success) {
-        console.log('✅ Download started:', json);
-        // Optional: simple user feedback
-        alert('Repo download started on flipboard: ' + (json.target_dir || ''));
-        return true;
-      }
-      console.warn('Endpoint responded but not success:', { status: res.status, json });
-      lastError = { status: res.status, json, endpoint: ep };
-    } catch (err) {
-      console.warn(`Endpoint ${ep} failed:`, err.message);
-      lastError = err;
-    }
+  console.log(`🖼️ Opening code viewer for: ${githubUrl}`);
+  
+  // Extract owner and repo from GitHub URL
+  const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (match) {
+    const owner = match[1];
+    const repo = match[2];
+    
+    // Open code viewer in new window
+    const viewerUrl = `/gallery/code-viewer.html?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}&url=${encodeURIComponent(githubUrl)}`;
+    window.open(viewerUrl, '_blank', 'width=1200,height=800');
+    
+    return true;
+  } else {
+    console.error('Invalid GitHub URL format:', githubUrl);
+    // Fallback: open GitHub URL directly
+    window.open(githubUrl, '_blank');
+    return false;
   }
-  throw new Error('All download endpoints failed: ' + (lastError ? (lastError.message || JSON.stringify(lastError)) : 'unknown error'));
 }

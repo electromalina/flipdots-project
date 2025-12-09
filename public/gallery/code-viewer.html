@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Code Viewer</title>
+  <style>
+    body { 
+      margin: 0; 
+      display: flex; 
+      height: 100vh; 
+      font-family: sans-serif; 
+      background: #000;
+      color: #fff;
+    }
+    #sidebar { 
+      width: 300px; 
+      overflow-y: auto; 
+      background: #111; 
+      border-right: 2px solid #04626C; 
+    }
+    #sidebar ul { 
+      list-style: none; 
+      margin: 0; 
+      padding: 0; 
+    }
+    #sidebar li { 
+      padding: 8px 12px; 
+      cursor: pointer; 
+      border-bottom: 1px solid #222;
+      word-break: break-all;
+    }
+    #sidebar li:hover { 
+      background: #222; 
+    }
+    #sidebar li.active { 
+      background: #04626C; 
+      font-weight: bold; 
+    }
+    #content { 
+      flex: 1; 
+      padding: 20px; 
+      overflow-y: auto; 
+      white-space: pre; 
+      font-family: 'Courier New', monospace;
+      background: #000;
+      color: #ccc;
+      font-size: 14px;
+    }
+    #header {
+      padding: 15px;
+      background: #111;
+      border-bottom: 2px solid #04626C;
+      color: #04626C;
+      font-weight: bold;
+    }
+    .error {
+      color: #e74c3c;
+      padding: 20px;
+    }
+    .loading {
+      color: #999;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="header">Loading repository…</div>
+  <ul id="fileList"></ul>
+</div>
+<div id="content" class="loading">Loading repository files…</div>
+
+<script>
+function parseGitHubUrl(url) {
+  // Match patterns like:
+  // https://github.com/owner/repo
+  // https://github.com/owner/repo/tree/branch
+  // https://github.com/owner/repo/tree/branch/path
+  const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (match) {
+    return {
+      owner: match[1],
+      repo: match[2]
+    };
+  }
+  return null;
+}
+
+async function fetchRecursive(owner, repo, path = "", branch = "main") {
+  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+
+  const res = await fetch(api, {
+    headers: { "Accept": "application/vnd.github+json" }
+  });
+
+  if (!res.ok) {
+    console.error("Fetch failed:", path, res.status);
+    return [];
+  }
+
+  const items = await res.json();
+  let files = [];
+
+  for (const item of items) {
+    if (item.type === "file") {
+      // Fetch file contents
+      try {
+        const contentRes = await fetch(item.download_url);
+        const text = await contentRes.text();
+
+        files.push({
+          path: item.path,
+          content: text,
+          size: item.size
+        });
+      } catch (err) {
+        console.error("Failed to fetch file:", item.path, err);
+        files.push({
+          path: item.path,
+          content: `Error loading file: ${err.message}`,
+          size: item.size
+        });
+      }
+    }
+
+    if (item.type === "dir") {
+      const sub = await fetchRecursive(owner, repo, item.path, branch);
+      files = files.concat(sub);
+    }
+  }
+
+  return files;
+}
+
+async function loadRepo() {
+  // Get owner and repo from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const owner = urlParams.get('owner');
+  const repo = urlParams.get('repo');
+  const githubUrl = urlParams.get('url');
+
+  let finalOwner, finalRepo;
+
+  if (owner && repo) {
+    finalOwner = owner;
+    finalRepo = repo;
+  } else if (githubUrl) {
+    const parsed = parseGitHubUrl(githubUrl);
+    if (parsed) {
+      finalOwner = parsed.owner;
+      finalRepo = parsed.repo;
+    } else {
+      document.getElementById("content").innerHTML = '<div class="error">Invalid GitHub URL format</div>';
+      document.getElementById("header").textContent = 'Error';
+      return;
+    }
+  } else {
+    document.getElementById("content").innerHTML = '<div class="error">No repository specified. Use ?owner=xxx&repo=yyy or ?url=https://github.com/owner/repo</div>';
+    document.getElementById("header").textContent = 'Error';
+    return;
+  }
+
+  document.getElementById("header").textContent = `${finalOwner}/${finalRepo}`;
+  document.title = `${finalOwner}/${finalRepo} — Code Viewer`;
+
+  try {
+    const allFiles = await fetchRecursive(finalOwner, finalRepo);
+
+    if (allFiles.length === 0) {
+      document.getElementById("content").innerHTML = '<div class="error">No files found in repository</div>';
+      return;
+    }
+
+    const ul = document.getElementById("fileList");
+    const contentDiv = document.getElementById("content");
+
+    allFiles.forEach((file, index) => {
+      const li = document.createElement("li");
+      li.textContent = file.path;
+
+      li.onclick = () => {
+        ul.querySelectorAll("li").forEach(x => x.classList.remove("active"));
+        li.classList.add("active");
+        contentDiv.textContent = file.content;
+      };
+
+      ul.appendChild(li);
+
+      if (index === 0) li.click();
+    });
+  } catch (err) {
+    document.getElementById("content").innerHTML = `<div class="error">Error loading repository: ${err.message}</div>`;
+    console.error(err);
+  }
+}
+
+loadRepo();
+</script>
+
+</body>
+</html>
+
