@@ -5,8 +5,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Flipboard Slack API</title>
-        <meta name="description" content="Slack app for uploading flipboard GitHub links" />
+        <title>Slack API</title>
+        <meta name="description" content="Slack app for uploading GitHub links" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -15,7 +15,6 @@ export default function Home() {
           <img src="/gallery/logo.png" alt="ROOM" className="logo" />
         </div>
 
-        <h1>🎮 Flipboard Slack API</h1>
         <p className="subtitle">Homepage for the Room and Slack API checks</p>
 
         <div className="buttons-container">
@@ -26,59 +25,6 @@ export default function Home() {
           <div className="secondary-buttons">
             <Link href="/api">API Endpoints</Link>
             <Link href="/api/health">API Health Check</Link>
-          </div>
-        </div>
-
-        <div className="features">
-          <div className="feature-card">
-            <h3>⚡ Slack Integration</h3>
-            <p>Use <code>/upload-flipboard</code> command in Slack to share GitHub repositories</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>📊 Dashboard</h3>
-            <p>View all uploaded repositories with user information and timestamps</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>🔗 GitHub Links</h3>
-            <p>Automatic validation and parsing of GitHub repository URLs</p>
-          </div>
-        </div>
-
-        <div className="endpoints">
-          <h2>Available Endpoints</h2>
-          <div className="endpoint-list">
-            <div className="endpoint-item">
-              <span className="method get">GET</span>
-              <Link href="/api" className="endpoint-url">/api</Link>
-              <span className="endpoint-desc">API information</span>
-            </div>
-            <div className="endpoint-item">
-              <span className="method get">GET</span>
-              <Link href="/api/health" className="endpoint-url">/api/health</Link>
-              <span className="endpoint-desc">Health check</span>
-            </div>
-            <div className="endpoint-item">
-              <span className="method post">POST</span>
-              <span className="endpoint-url">/api/slack/events</span>
-              <span className="endpoint-desc">Slack slash command handler</span>
-            </div>
-            <div className="endpoint-item">
-              <span className="method get">GET</span>
-              <Link href="/api/uploads" className="endpoint-url">/api/uploads</Link>
-              <span className="endpoint-desc">Upload history (JSON)</span>
-            </div>
-            <div className="endpoint-item">
-              <span className="method get">GET</span>
-              <Link href="/dashboard" className="endpoint-url">/dashboard</Link>
-              <span className="endpoint-desc">Upload dashboard (UI)</span>
-            </div>
-            <div className="endpoint-item">
-              <span className="method get">GET</span>
-              <a href="/gallery/room.html" className="endpoint-url">/gallery/room.html</a>
-              <span className="endpoint-desc">3D Gallery Room</span>
-            </div>
           </div>
         </div>
       </div>
@@ -170,69 +116,6 @@ export default function Home() {
           color: #ffffff;
         }
 
-        .feature-card {
-          background: white;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          text-align: center;
-        }
-
-        .features {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
-          margin: 30px 0;
-        }
-
-        .endpoints {
-          background: white;
-          padding: 20px;
-          border-radius: 12px;
-          margin: 20px 0;
-        }
-
-        .endpoint-list {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .endpoint-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .method {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-weight: bold;
-        }
-
-        .method.get {
-          background: #27ae60;
-          color: white;
-        }
-
-        .method.post {
-          background: #e74c3c;
-          color: white;
-        }
-
-        .endpoint-url {
-          font-family: 'Monaco', monospace;
-          color: #3498db;
-        }
-
-        code {
-          background: #1a1a1a;
-          color: #04626C;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-family: 'Monaco', 'Courier New', monospace;
-        }
-
         @media (max-width: 768px) {
           .container {
             padding: 20px 15px;
@@ -240,16 +123,6 @@ export default function Home() {
 
           h1 {
             font-size: 2.5em;
-          }
-
-          .features {
-            grid-template-columns: 1fr;
-          }
-
-          .endpoint-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
           }
 
           .main-button {

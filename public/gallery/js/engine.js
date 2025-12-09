@@ -43,6 +43,40 @@ const ICON_PATHS = [
 // image cache for gallery frames
 const svgImages = new Map();
 let svgsLoaded = false;
+
+/**
+ * Load all SVG/icon images for gallery frames
+ */
+function loadSVGImages() {
+  let loadedCount = 0;
+  const totalImages = ICON_PATHS.length;
+
+  if (totalImages === 0) {
+    svgsLoaded = true;
+    return;
+  }
+
+  ICON_PATHS.forEach((path) => {
+    const img = new Image();
+    img.onload = () => {
+      svgImages.set(path, img);
+      loadedCount++;
+      if (loadedCount === totalImages) {
+        svgsLoaded = true;
+        console.log('✅ All gallery images loaded');
+      }
+    };
+    img.onerror = () => {
+      console.warn(`⚠️ Failed to load image: ${path}`);
+      loadedCount++;
+      if (loadedCount === totalImages) {
+        svgsLoaded = true;
+      }
+    };
+    img.src = path;
+  });
+}
+
 /**
  * Initialize all canvas contexts and Three.js setup
  * @param {HTMLCanvasElement} mainCanvas - Main rendering canvas
@@ -246,6 +280,8 @@ export function render() {
   // Project geometry to screen
   const cornerCols = new Array(canvas.width).fill(false);
   const frameCols = new Array(canvas.width).fill(false);
+  const frameIndices = new Array(canvas.width).fill(-1);
+  const frameDepths = new Array(canvas.width).fill(Infinity);
   const halfFov = FOV / 2;
   
   // Project corner points for pillars
@@ -263,6 +299,32 @@ export function render() {
       const colFloat = (delta / halfFov) * (canvas.width / 2) + (canvas.width / 2);
       const colCenter = Math.round(colFloat);
       
+      if (colCenter >= 0 && colCenter < canvas.width) {
+        const wallDist = colDepth[colCenter] * 8;
+        if (Math.abs(dist - wallDist) < 0.5 || dist <= wallDist) {
+          cornerCols[colCenter] = true;
+        }
+      }
+    }
+  }
+
+  // Project gallery frames to screen
+  for (let i = 0; i < galleryFrames.length; i++) {
+    const gf = galleryFrames[i];
+    if (!gf || gf.title === 'Empty Slot') continue; // Skip empty slots
+    
+    const dx = gf.x - px;
+    const dy = gf.y - py;
+    const frameAngle = Math.atan2(dy, dx);
+    
+    let delta = frameAngle - pa;
+    delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+    
+    if (Math.abs(delta) <= halfFov * 1.2) {
+      const dist = Math.hypot(dx, dy);
+      const colFloat = (delta / halfFov) * (canvas.width / 2) + (canvas.width / 2);
+      const colCenter = Math.round(colFloat);
+      
       for (let t = -Math.floor(FRAME_THICKNESS / 2); t <= Math.floor((FRAME_THICKNESS - 1) / 2); t++) {
         const cx = colCenter + t;
         if (cx >= 0 && cx < canvas.width) {
@@ -271,7 +333,7 @@ export function render() {
           if (Math.abs(dist - wallDist) < 0.5 || dist <= wallDist) {
             if (dist < frameDepths[cx]) {
               frameCols[cx] = true;
-              frameIndices[cx] = i;
+              frameIndices[cx] = i; // Use gallery frame index, not corner point index
               frameDepths[cx] = dist;
             }
           }

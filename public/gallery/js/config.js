@@ -32,11 +32,11 @@ export const TRIGGER_COOLDOWN = 7000;
 /** Precision threshold for looking at paintings (radians) - how accurate you need to aim */
 export const LOOK_PRECISION = 0.05;
 
-/** Player movement speed (units per frame at 15fps) - calibrated for smooth movement */
-export const MOVE_SPEED = 2.2 / 15;
+/** Player movement speed (units per second) - calibrated for smooth movement */
+export const MOVE_SPEED = 2.2;
 
-/** Player rotation speed (radians per frame at 15fps) - how fast you can turn */
-export const ROTATION_SPEED = 1.8 / 15;
+/** Player rotation speed (radians per second) - how fast you can turn */
+export const ROTATION_SPEED = 1.8;
 
 /** Field of view in radians (60 degrees) - how wide your view is */
 export const FOV = Math.PI / 3;

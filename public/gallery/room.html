@@ -89,7 +89,7 @@
       flex-direction: column;
       align-items: center;
       gap: 12px;
-      width: 100%;
+    
       flex: 0 0 auto;
       max-height: 30%;
     }
@@ -344,6 +344,10 @@
       transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       flex-shrink: 1;
       min-height: 0;
+    }
+
+    .accordion-item.expanded .accordion-content {
+      max-height: 500px;
     }
 
 
@@ -807,6 +811,33 @@
     setInterval(updateGalleryStatus, 5000);
 
     // =============================================================================
+    // ACCORDION HANDLERS
+    // =============================================================================
+
+    // Setup accordion toggle functionality
+    function setupAccordions() {
+      const controlsHeader = document.getElementById('controlsHeader');
+      const uploadsHeader = document.getElementById('uploadsHeader');
+      const controlsAccordion = document.getElementById('controlsAccordion');
+      const uploadsAccordion = document.getElementById('uploadsAccordion');
+
+      if (controlsHeader && controlsAccordion) {
+        controlsHeader.addEventListener('click', () => {
+          controlsAccordion.classList.toggle('expanded');
+        });
+      }
+
+      if (uploadsHeader && uploadsAccordion) {
+        uploadsHeader.addEventListener('click', () => {
+          uploadsAccordion.classList.toggle('expanded');
+        });
+      }
+    }
+
+    // Initialize accordions after DOM is ready
+    setupAccordions();
+
+    // =============================================================================
     // UPLOADS SIDEBAR
     // =============================================================================
 
@@ -885,12 +916,13 @@
     // =============================================================================
 
     let last = performance.now();
+    let lastMini = 0;
 
     /**
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
-    function gameLoop(now) {
+    async function gameLoop(now) {
       const dt = Math.min((now - last) / 1000, 0.016); // Cap dt to 16ms
       last = now;
 
@@ -935,6 +967,11 @@
     }
 
     // =============================================================================
+    // START GAME LOOP
+    // =============================================================================
+
+    // Start the game loop
+    requestAnimationFrame(gameLoop);
 
     // Manual refresh function for debugging
     window.refreshGallery = refreshGallery;

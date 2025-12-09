@@ -230,6 +230,7 @@ function updateGalleryFrames(uploads) {
   // Fill remaining positions with default entries if needed
   while (galleryFrames.length < positions.length) {
     const position = positions[galleryFrames.length];
+    const frameIndex = galleryFrames.length;
     galleryFrames.push({
       x: position.x,
       y: position.y,
@@ -240,7 +241,7 @@ function updateGalleryFrames(uploads) {
       timestamp: new Date().toISOString(),
       lastTrigger: 0,
       colorIndex: Math.floor(Math.random() * 6),
-      svg: demoFrames[i]?.svg || ICON_PATHS[i % ICON_PATHS.length]
+      svg: iconPaths[frameIndex % iconPaths.length]
     });
   }
 
