@@ -32,14 +32,27 @@
   Last Updated: 2025
   =============================================================================
   -->
-  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+  <!-- Socket.io for controller (optional - only loads if localhost:4000 available) -->
   <script>
-    window._controllerIO = window.io;
+    // Try to load socket.io from local flipdot-caster service
+    const socketScript = document.createElement('script');
+    socketScript.src = 'http://localhost:4000/socket.io/socket.io.js';
+    socketScript.async = true;
+    socketScript.onerror = () => {
+      console.log('⚠️ Socket.io not available - flipdot-caster not running');
+      window._controllerIO = null;
+    };
+    socketScript.onload = () => {
+      console.log('✓ Socket.io connected');
+      window._controllerIO = window.io;
+    };
+    document.head.appendChild(socketScript);
   </script>
-  <script type="module" src="./main.js"></script>
 
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
+  <!-- Favicon - emoji as data URI to avoid 404 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🎨</text></svg>" />
   <style>
     /* =============================================================================
        FLIPBOARD 3D GALLERY STYLES
@@ -877,6 +890,9 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
+    function gameLoop(now) {
+      const dt = Math.min((now - last) / 1000, 0.016); // Cap dt to 16ms
+      last = now;
 
       // =============================================================================
       // UPDATE PHASE
