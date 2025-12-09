@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!-- 
   =============================================================================
@@ -37,58 +38,61 @@
     const CONTROLLER_URL = location.hostname === "localhost"
       ? "http://localhost:4000"
       : "https://flipdot-controller.onrender.com";
-  
+
     const socketScript = document.createElement('script');
     socketScript.src = `${CONTROLLER_URL}/socket.io/socket.io.js`;
     socketScript.async = true;
-  
+
     socketScript.onerror = () => {
       console.log('⚠️ Controller not reachable');
       window._controllerIO = null;
     };
-  
+
     socketScript.onload = () => {
       console.log('✓ Controller socket loaded');
       window._controllerIO = window.io;
     };
-  
+
     document.head.appendChild(socketScript);
   </script>
-  
+
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <!-- Favicon - emoji as data URI to avoid 404 -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🎨</text></svg>" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🎨</text></svg>" />
   <style>
     /* =============================================================================
        FLIPBOARD 3D GALLERY STYLES
        ============================================================================= */
-    
+
     /* Main game display container - holds both canvas layers */
-    .stage { 
-      position: relative; 
+    .stage {
+      position: relative;
       width: 100%;
       max-width: 1000px;
       height: 100%;
       max-height: 100%;
       aspect-ratio: 3 / 1;
-      border: 2px solid #333;                    /* Flipboard-style border */
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);   /* Subtle depth effect */
-      margin: 0 auto;
-    
-    }
-    
-    /* Development minimap */
-    #mini { 
-      image-rendering: pixelated; 
-      width: 280px; 
-      height: 280px; 
-      background: #222; 
       border: 2px solid #333;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      /* Flipboard-style border */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      /* Subtle depth effect */
+      margin: 0 auto;
+
+    }
+
+    /* Development minimap */
+    #mini {
+      image-rendering: pixelated;
+      width: 280px;
+      height: 280px;
+      background: #222;
+      border: 2px solid #333;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
     }
-    
+
     /* Minimap container with legend */
     .minimap-container {
       display: flex;
@@ -191,7 +195,8 @@
 
 
     /* Center layout and flipboard theme */
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -644,8 +649,7 @@
 
     <div class="game-container">
       <div class="minimap-container">
-        <canvas id="mini" width="128" height="128"
-          title="Minimap - Colored dots show your gallery paintings"></canvas>
+        <canvas id="mini" width="128" height="128" title="Minimap - Colored dots show your gallery paintings"></canvas>
         <div class="minimap-legend"></div>
       </div>
 
@@ -766,33 +770,44 @@
       // Connect to controller server
       window.controllerSocket = socket; // For debugging
 
-      console.log("📱 Controller connected");
+
 
       // Tap-based movement
       socket.on("move", dir => {
+        console.log(" MOVE:", dir);
         remoteMove(dir);
       });
 
       socket.on("look", dir => {
+        console.log(" LOOK:", dir);
         remoteLook(dir);
       });
 
       // Hold-based movement
       socket.on("move_start", dir => {
+        console.log(" MOVE START:", dir);
         remoteMoveHold(dir, true);
       });
 
       socket.on("move_stop", dir => {
+        console.log(" MOVE STOP:", dir);
         remoteMoveHold(dir, false);
       });
 
       // Hold-based looking
       socket.on("look_start", dir => {
+        console.log(" LOOK START:", dir);
         remoteLookHold(dir, true);
       });
 
       socket.on("look_stop", dir => {
+        console.log(" LOOK STOP:", dir);
         remoteLookHold(dir, false);
+      });
+
+      // Minimap receive debug
+      socket.on("minimap_frame", () => {
+        console.log(" Minimap frame received");
       });
     }
 
@@ -897,7 +912,7 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
-     function gameLoop(now) {
+    function gameLoop(now) {
       const dt = Math.min((now - last) / 1000, 0.016); // Cap dt to 16ms
       last = now;
 
