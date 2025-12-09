@@ -142,18 +142,6 @@ document.addEventListener('visibilitychange', () => {
  * @returns {boolean} True if player moved (for cache invalidation)
  */
 export function updateMovement(dt) {
-<<<<<<< HEAD
-  // Process input
-  const forward = (keys['w'] || keys['arrowup']) ? 1 : 
-                 (keys['s'] || keys['arrowdown']) ? -1 : 0;
-  const strafe = keys['a'] ? -1 : keys['d'] ? 1 : 0;
-  const turn = (keys['q'] || keys['arrowleft']) ? -1 : 
-              (keys['e'] || keys['arrowright']) ? 1 : 0;
-
-  let moved = false;
-
-  // Update player rotation
-=======
   const forward = (keys['w'] || keys['arrowup']) ? 1 :
                   (keys['s'] || keys['arrowdown']) ? -1 : 0;
   const strafe  = keys['a'] ? -1 : keys['d'] ? 1 : 0;
@@ -162,8 +150,7 @@ export function updateMovement(dt) {
 
   let moved = false;
 
-  // rotation
->>>>>>> electromalina/main
+  // Update player rotation
   if (turn !== 0) {
     pa += turn * ROTATION_SPEED * dt;
     moved = true;

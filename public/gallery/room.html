@@ -28,12 +28,6 @@
   - Mouse: Look around
   - Click paintings: Open GitHub repository in new tab
   
-<<<<<<< HEAD
-  Author: Flipboard Project Team
-  Last Updated: 2025
-  =============================================================================
-  -->
-=======
   Author: Team NANO
   Last Updated: 2025
   =============================================================================
@@ -44,7 +38,6 @@
   </script>
   <script type="module" src="./main.js"></script>
 
->>>>>>> electromalina/main
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <style>
@@ -87,11 +80,6 @@
       flex: 0 0 auto;
       max-height: 30%;
     }
-    
-    .minimap-legend {
-      background: #000;
-      border: 2px solid #fff;
-=======
 
     /* Main game display container - native flipdot resolution: 84x28 */
     .stage {
@@ -161,162 +149,22 @@
     .minimap-legend {
       background: #000;
       border: 2px solid #04626C;
->>>>>>> electromalina/main
       padding: 16px 20px;
       font-size: 0.9em;
       color: #ccc;
       text-align: center;
       width: 100%;
       line-height: 1.6;
-<<<<<<< HEAD
-      display: none; /* Hide legend for cleaner look */
-    }
-    
-    .minimap-legend strong {
-      color: #fff;
-=======
       display: none;
       /* Hide legend for cleaner look */
     }
 
     .minimap-legend strong {
       color: #04626C;
->>>>>>> electromalina/main
       display: block;
       margin-bottom: 10px;
       font-size: 1.05em;
     }
-<<<<<<< HEAD
-    
-    .minimap-legend div {
-      margin: 6px 0;
-    }
-    
-    /* Ensure minimap canvas is properly sized */
-    #mini {
-      width: 100%;
-      max-width: 240px;
-      height: auto;
-      aspect-ratio: 1;
-    }
-    
-    /* Center layout and flipboard theme */
-    body { 
-      margin: 0; 
-      padding: 20px;
-      display: flex; 
-      flex-direction: column;
-      align-items: center; 
-      justify-content: flex-start; 
-      min-height: 100vh; 
-      background: #000;
-      font-family: 'Courier New', monospace;
-      color: #fff;
-      position: relative;
-    }
-    
-    /* Main content wrapper */
-    .main-content {
-      width: 100%;
-      max-width: 1800px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 20px;
-    }
-    
-    /* Flipboard dot matrix effect */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: 
-          radial-gradient(circle at center, #222 1px, transparent 1px);
-      background-size: 12px 12px;
-      opacity: 0.3;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-      border: 2px solid #fff;
-      padding: 28px 40px;
-      background: #000;
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 1800px;
-      box-sizing: border-box;
-    }
-
-    .header h1 {
-      font-size: 2.5em;
-      margin: 0;
-      color: #fff;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      letter-spacing: 2px;
-      font-weight: bold;
-    }
-
-    .header p {
-      margin: 10px 0;
-      color: #ccc;
-      font-size: 1.1em;
-    }
-
-    /* Game container - 3 columns */
-    .game-container {
-      display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      grid-template-rows: 1fr;
-      gap: 24px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 1800px;
-      height: calc(100vh - 280px);
-      min-height: 600px;
-      max-height: 800px;
-      align-items: stretch;
-      padding: 0 20px;
-    }
-    
-    /* Left panel (controls + minimap) */
-    .left-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-    
-    /* Game area (center - most important) */
-    .game-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-    }
-    
-    /* Stage container for better alignment */
-    .stage-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-=======
 
     .minimap-legend div {
       margin: 6px 0;
@@ -506,139 +354,11 @@
     .accordion-body::-webkit-scrollbar-thumb {
       background: #333;
       border: 1px solid #04626C;
->>>>>>> electromalina/main
     }
 
     /* Controls panel */
     .controls {
       background: #000;
-<<<<<<< HEAD
-      padding: 16px;
-      border: 2px solid #fff;
-      width: 100%;
-      position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
-      flex: 0 0 auto;
-      max-height: 45%;
-    }
-    
-    .controls h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: #fff;
-      font-size: 1.1em;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-      padding-bottom: 8px;
-      border-bottom: 1px solid #333;
-    }
-    
-    .controls h3:not(:first-child) {
-      margin-top: 16px;
-    }
-    
-    /* Uploads sidebar (right side) */
-    .uploads-sidebar {
-      background: #000;
-      padding: 16px;
-      border: 2px solid #fff;
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .uploads-sidebar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 8px,
-              rgba(255, 255, 255, 0.02) 8px,
-              rgba(255, 255, 255, 0.02) 16px
-          );
-      pointer-events: none;
-    }
-    
-    .uploads-sidebar h3 {
-      margin-top: 0;
-      color: #fff;
-      font-size: 1.1em;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid #333;
-      padding-bottom: 10px;
-      margin-bottom: 12px;
-      flex-shrink: 0;
-    }
-    
-    .uploads-list {
-      overflow-y: auto;
-      flex: 1;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .uploads-list::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    .uploads-list::-webkit-scrollbar-track {
-      background: #000;
-    }
-    
-    .uploads-list::-webkit-scrollbar-thumb {
-      background: #333;
-      border: 1px solid #666;
-    }
-    
-    .uploads-list::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-    
-    .upload-item {
-      background: #111;
-      border: 1px solid #333;
-      padding: 12px;
-      margin-bottom: 10px;
-      transition: all 0.2s ease;
-      position: relative;
-      border-radius: 2px;
-    }
-    
-    .upload-item:hover {
-      border-color: #fff;
-      background: #1a1a1a;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-    
-    .upload-item.loading {
-      text-align: center;
-      color: #888;
-      border-color: #666;
-    }
-    
-    .upload-item.empty {
-      text-align: center;
-      color: #666;
-      border-color: #444;
-      font-style: italic;
-    }
-    
-    .upload-item .repo-name {
-      color: #fff;
-=======
       padding: 0;
       width: 100%;
     }
@@ -708,7 +428,6 @@
 
     .upload-item .repo-name {
       color: #04626C;
->>>>>>> electromalina/main
       font-weight: bold;
       margin-bottom: 8px;
       font-size: 0.95em;
@@ -718,30 +437,6 @@
       align-items: center;
       gap: 8px;
     }
-<<<<<<< HEAD
-    
-    .minimap-color-indicator {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 2px solid;
-      flex-shrink: 0;
-      box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.8;
-        transform: scale(1.1);
-      }
-    }
-    
-=======
 
     .minimap-color-indicator {
       width: 14px;
@@ -750,60 +445,12 @@
       flex-shrink: 0;
     }
 
->>>>>>> electromalina/main
     .upload-item .repo-info {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 8px;
       font-size: 0.75em;
-<<<<<<< HEAD
-      color: #ccc;
-    }
-    
-    .upload-item .repo-info span {
-      background: #000;
-      padding: 3px 6px;
-      border: 1px solid #444;
-      border-radius: 2px;
-    }
-    
-    .upload-item .github-link {
-      display: inline-block;
-      color: #fff;
-      text-decoration: none;
-      border: 1px solid #fff;
-      padding: 6px 12px;
-      font-size: 0.85em;
-      transition: all 0.2s ease;
-      margin-top: 6px;
-      border-radius: 2px;
-    }
-    
-    .upload-item .github-link:hover {
-      background: #fff;
-      color: #000;
-    }
-    
-    .controls::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 8px,
-              rgba(255, 255, 255, 0.02) 8px,
-              rgba(255, 255, 255, 0.02) 16px
-          );
-      pointer-events: none;
-    }
-
-=======
       color: #999;
     }
 
@@ -822,7 +469,6 @@
       font-size: 0.85em;
       margin-top: 6px;
     }
->>>>>>> electromalina/main
 
     .controls ul {
       list-style: none;
@@ -833,11 +479,6 @@
     .controls li {
       padding: 4px 0;
       color: #ccc;
-<<<<<<< HEAD
-      position: relative;
-      z-index: 1;
-=======
->>>>>>> electromalina/main
       line-height: 1.4;
       font-size: 0.9em;
     }
@@ -845,56 +486,6 @@
     .controls .key {
       background: #000;
       padding: 2px 6px;
-<<<<<<< HEAD
-      border: 1px solid #fff;
-      font-weight: bold;
-      color: #fff;
-      margin-right: 8px;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    }
-
-    /* Status panel */
-    .status {
-      background: #000;
-      padding: 20px 28px;
-      border: 2px solid #fff;
-      text-align: center;
-      margin-bottom: 32px;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      max-width: 1800px;
-      box-sizing: border-box;
-    }
-    
-    .status::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-          linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 51%);
-      background-size: 8px 8px;
-      pointer-events: none;
-    }
-
-    .status h3 {
-      margin: 0 0 10px 0;
-      color: #fff;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-    }
-
-    #galleryStatus {
-      color: #fff;
-      font-weight: bold;
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-=======
       border: 1px solid #04626C;
       font-weight: bold;
       color: #04626C;
@@ -904,7 +495,6 @@
     /* Status panel - minimal inline */
     .status {
       display: none;
->>>>>>> electromalina/main
     }
 
     /* Loading indicator */
@@ -917,10 +507,6 @@
       font-family: monospace;
       font-size: 18px;
       text-align: center;
-<<<<<<< HEAD
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-=======
->>>>>>> electromalina/main
     }
 
     .loading::after {
@@ -929,279 +515,6 @@
     }
 
     @keyframes dots {
-<<<<<<< HEAD
-      0%, 20% { content: ''; }
-      40% { content: '.'; }
-      60% { content: '..'; }
-      80%, 100% { content: '...'; }
-    }
-
-    /* Navigation */
-    .nav {
-      margin-top: 40px;
-      text-align: center;
-      width: 100%;
-      max-width: 1800px;
-      padding: 0 20px;
-    }
-
-    .nav a {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 0 10px;
-      background: #000;
-      color: #fff;
-      text-decoration: none;
-      border: 2px solid #fff;
-      font-weight: bold;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      font-family: 'Courier New', monospace;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-      image-rendering: pixelated;
-    }
-    
-    .nav a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 4px,
-              rgba(255, 255, 255, 0.05) 4px,
-              rgba(255, 255, 255, 0.05) 8px
-          );
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    .nav a:hover {
-      background: #fff;
-      color: #000;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      text-shadow: none;
-    }
-    
-    .nav a:hover::before {
-      transform: translateX(0);
-      background: 
-          repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 4px,
-              rgba(0, 0, 0, 0.05) 4px,
-              rgba(0, 0, 0, 0.05) 8px
-          );
-    }
-
-    /* Flipdot casting controls */
-    .flipdot-button {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 0 10px;
-      background: #000;
-      color: #fff;
-      border: 2px solid #fff;
-      font-weight: bold;
-      font-family: 'Courier New', monospace;
-      font-size: 1em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    }
-
-    .flipdot-button:hover {
-      background: #fff;
-      color: #000;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-
-    .flipdot-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .flipdot-button.is-active {
-      background: #fff;
-      color: #000;
-    }
-
-    .flipdot-status {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 0 10px;
-      background: #000;
-      border: 2px solid #fff;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-      text-align: center;
-    }
-
-    .flipdot-status[data-state="idle"] {
-      border-color: #666;
-      color: #999;
-    }
-
-    .flipdot-status[data-state="pending"] {
-      border-color: #ffaa00;
-      color: #ffaa00;
-    }
-
-    .flipdot-status[data-state="ready"] {
-      border-color: #00ff00;
-      color: #00ff00;
-    }
-
-    .flipdot-status[data-state="error"] {
-      border-color: #ff0000;
-      color: #ff0000;
-    }
-
-    .flipdot-status-text {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .flipdot-status small {
-      display: block;
-      font-size: 0.85em;
-      opacity: 0.8;
-    }
-
-    /* Responsive design */
-    @media (max-width: 1500px) {
-      .game-container {
-        grid-template-columns: 260px 1fr 280px;
-        gap: 20px;
-        height: calc(100vh - 260px);
-      }
-    }
-    
-    @media (max-width: 1400px) {
-      .game-container {
-        grid-template-columns: 240px 1fr 260px;
-        gap: 18px;
-        height: calc(100vh - 240px);
-      }
-    }
-    
-    @media (max-width: 1200px) {
-      .game-container {
-        grid-template-columns: 220px 1fr 240px;
-        gap: 16px;
-        height: calc(100vh - 220px);
-      }
-      
-      .controls {
-        padding: 12px;
-        max-height: 40%;
-      }
-      
-      .controls h3 {
-        font-size: 1em;
-        margin-bottom: 8px;
-      }
-      
-      .controls li {
-        font-size: 0.85em;
-        padding: 3px 0;
-      }
-      
-      #mini {
-        max-width: 200px;
-      }
-    }
- 
-    @media (max-width: 900px) {
-      .game-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        height: auto;
-        min-height: auto;
-        max-height: none;
-      }
-      
-      .left-panel {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        height: auto;
-      }
-      
-      .controls {
-        max-height: none;
-      }
-      
-      .minimap-container {
-        max-height: none;
-      }
-      
-      .uploads-sidebar {
-        grid-column: 1 / -1;
-        height: 300px;
-      }
-      
-      .game-area {
-        height: 400px;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .left-panel {
-        grid-template-columns: 1fr;
-      }
-      
-      .stage {
-        width: 630px;
-        height: 210px;
-      }
-      
-      #v {
-        width: 630px;
-        height: 210px;
-      }
-      
-      #post {
-        width: 630px;
-        height: 210px;
-      }
-    }
-
-    @media (max-width: 700px) {
-      body {
-        padding: 12px;
-      }
-      
-      .header {
-        padding: 16px;
-      }
-      
-      .header h1 {
-        font-size: 2em;
-      }
-      
-      .stage {
-        width: 420px;
-        height: 140px;
-      }
-      
-      #v {
-        width: 420px;
-        height: 140px;
-      }
-      
-      #post {
-        width: 420px;
-        height: 140px;
-      }
-      
-=======
 
       0%,
       20% {
@@ -1229,17 +542,10 @@
         gap: 12px;
       }
 
->>>>>>> electromalina/main
       #mini {
         width: 240px;
         height: 240px;
       }
-<<<<<<< HEAD
-      
-      .minimap-legend {
-        font-size: 0.75em;
-        padding: 10px 12px;
-=======
 
       .header img {
         max-width: 200px;
@@ -1306,53 +612,10 @@
       #mini {
         width: 180px;
         height: 180px;
->>>>>>> electromalina/main
       }
     }
   </style>
 </head>
-<<<<<<< HEAD
-<body>
-  <div class="main-content">
-    <div class="header">
-      <h1>🎨 Flipboard Gallery Room</h1>
-      <p>Your Slack API uploads transformed into interactive 3D paintings!</p>
-    </div>
-
-    <div class="status">
-      <h3>🖼️ Gallery Status</h3>
-      <div id="galleryStatus">Loading paintings...</div>
-    </div>
-
-    <div class="game-container">
-      <div class="left-panel">
-        <div class="controls">
-          <h3>🎮 Controls</h3>
-          <ul>
-            <li><span class="key">WASD</span> Move around</li>
-            <li><span class="key">Q/E</span> Turn left/right</li>
-            <li><span class="key">↑↓←→</span> Alternative movement</li>
-          </ul>
-          
-          <h3>🖼️ Gallery</h3>
-          <ul>
-            <li>🔍 Look closely at paintings to trigger them</li>
-            <li>🔗 Paintings open GitHub repository links</li>
-            <li>🔄 Gallery auto-updates every 30 seconds</li>
-            <li>📱 Up to 6 most recent uploads displayed</li>
-          </ul>
-        </div>
-        
-        <div class="minimap-container">
-          <canvas id="mini" width="128" height="128" title="Minimap - Colored dots show your gallery paintings"></canvas>
-          <div class="minimap-legend"></div>
-        </div>
-      </div>
-        
-      <div class="game-area">
-        <div class="stage-wrapper">
-          <div class="stage">
-=======
 
 <body>
   <div class="main-content">
@@ -1371,20 +634,12 @@
         <div class="stage-wrapper">
           <div class="stage">
             <!-- Native flipdot resolution: 84x28 pixels (scaled 10x in CSS for visibility) -->
->>>>>>> electromalina/main
             <canvas id="v" width="84" height="28"></canvas>
             <canvas id="post" width="84" height="28"></canvas>
             <div class="loading" id="loading">Loading 3D Room</div>
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-      
-      <div class="uploads-sidebar">
-        <h3>📋 All Uploads</h3>
-        <div id="uploadsList" class="uploads-list">
-          <div class="upload-item loading">Loading uploads...</div>
-=======
     </div>
 
     <div class="accordion-container">
@@ -1431,49 +686,21 @@
               </div>
             </div>
           </div>
->>>>>>> electromalina/main
         </div>
       </div>
     </div>
   </div>
 
-<<<<<<< HEAD
-  <div class="nav">
-    <button id="flipdotCastBtn" class="flipdot-button">
-      ▶️ Cast to Flipdot Board
-    </button>
-    <button id="flipdotLocalCastBtn" class="flipdot-button" style="background: #04626C; border-color: #04626C;">
-      🎯 Cast to Local Preview
-    </button>
-    <div id="flipdotStatus" class="flipdot-status" data-state="idle">
-      <span class="flipdot-status-text">Flipdot caster idle</span>
-      <small id="flipdotStatusMeta">Target: 15 FPS</small>
-    </div>
-    <div id="flipdotLocalStatus" class="flipdot-status" data-state="idle" style="display:none;">
-      <span class="flipdot-status-text">Local preview idle</span>
-      <small id="flipdotLocalStatusMeta">localhost:3000</small>
-    </div>
-  </div>
-
-  <!-- Three.js for hardware acceleration -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  
-=======
 
   <!-- Three.js for hardware acceleration -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 
->>>>>>> electromalina/main
   <!-- Main application script -->
   <script type="module">
     // =============================================================================
     // MAIN APPLICATION ENTRY POINT
     // =============================================================================
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> electromalina/main
     import { TARGET_FPS } from './js/config.js';
     import { updateMovement, handleFloorInteractions, clearMovementKeys } from './js/player.js';
     import { updateGalleryInteractions, getGalleryFrameCount, refreshGallery, getAllUploads, getMarkerColor, getGalleryFrameByUrl } from './js/gallery.js';
@@ -1488,10 +715,6 @@
     const post = document.getElementById('post');
     const mini = document.getElementById('mini');
     const loading = document.getElementById('loading');
-<<<<<<< HEAD
-    const galleryStatus = document.getElementById('galleryStatus');
-=======
->>>>>>> electromalina/main
     const uploadsList = document.getElementById('uploadsList');
 
     // Initialize the rendering engine
@@ -1500,12 +723,6 @@
     // Hide loading indicator
     loading.style.display = 'none';
 
-<<<<<<< HEAD
-    // Update gallery status
-    function updateGalleryStatus() {
-      const count = getGalleryFrameCount();
-      galleryStatus.textContent = `${count} paintings loaded from API`;
-=======
 
     // =============================================================================
     // CONTROLLER SETUP
@@ -1570,7 +787,6 @@
       if (uploadsStatusBadge) {
         uploadsStatusBadge.textContent = `(${count} paintings)`;
       }
->>>>>>> electromalina/main
     }
 
     // Update status initially and periodically
@@ -1586,20 +802,12 @@
      */
     function updateUploadsSidebar() {
       const uploads = getAllUploads();
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> electromalina/main
       if (!uploads || uploads.length === 0) {
         uploadsList.innerHTML = '<div class="upload-item empty">No uploads yet. Upload via Slack!</div>';
         return;
       }
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> electromalina/main
       uploadsList.innerHTML = uploads.map((upload, index) => {
         // Extract repo name from repository field or github_url
         let repoName = 'Unknown Repository';
@@ -1611,17 +819,6 @@
             repoName = match[1];
           }
         }
-<<<<<<< HEAD
-        
-        const userName = upload.slack_user || upload.user_name || 'Unknown User';
-        const branch = upload.branch || 'main';
-        const timestamp = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : 'Unknown date';
-        
-        // Find matching gallery frame to get color
-        const galleryFrame = getGalleryFrameByUrl(upload.github_url);
-        let colorIndicator = '';
-        
-=======
 
         const userName = upload.slack_user || upload.user_name || 'Unknown User';
         const branch = upload.branch || 'main';
@@ -1631,18 +828,13 @@
         const galleryFrame = getGalleryFrameByUrl(upload.github_url);
         let colorIndicator = '';
 
->>>>>>> electromalina/main
         if (galleryFrame !== null && galleryFrame.colorIndex !== undefined) {
           const color = getMarkerColor(galleryFrame.colorIndex);
           colorIndicator = `
             <div class="minimap-color-indicator" style="background-color: ${color}; border-color: ${color};" title="This color on minimap"></div>
           `;
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> electromalina/main
         return `
           <div class="upload-item">
             <div class="repo-name">
@@ -1650,19 +842,11 @@
               <span>${repoName}</span>
             </div>
             <div class="repo-info">
-<<<<<<< HEAD
-              <span>🌿 ${branch}</span>
-              <span>👤 ${userName}</span>
-              <span>📅 ${timestamp}</span>
-            </div>
-            <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">🔗 View on GitHub</a>
-=======
               <span>${branch}</span>
               <span>${userName}</span>
               <span>${timestamp}</span>
             </div>
             <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">View on GitHub</a>
->>>>>>> electromalina/main
           </div>
         `;
       }).join('');
@@ -1672,20 +856,12 @@
     setTimeout(() => {
       updateUploadsSidebar();
     }, 2500);
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> electromalina/main
     // Listen for gallery update events
     window.addEventListener('galleryUpdated', () => {
       updateUploadsSidebar();
     });
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> electromalina/main
     // Also update periodically
     setInterval(() => {
       updateUploadsSidebar();
@@ -1701,51 +877,16 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
-<<<<<<< HEAD
-=======
-    let lastMini = 0;
->>>>>>> electromalina/main
-    async function gameLoop(now) {
-      // Calculate delta time with frame rate limiting
-      const dt = Math.min(3, (now - last) / (1000 / TARGET_FPS));
-      last = now;
-<<<<<<< HEAD
-      
-      // =============================================================================
-      // UPDATE PHASE
-      // =============================================================================
-      
-=======
 
       // =============================================================================
       // UPDATE PHASE
       // =============================================================================
 
->>>>>>> electromalina/main
       // Update player movement and check if cache needs invalidation
       const playerMoved = updateMovement(dt);
       if (playerMoved) {
         invalidateCache(); // Invalidate rendering cache when player rotates
       }
-<<<<<<< HEAD
-      
-      // Handle gallery painting interactions
-      await updateGalleryInteractions(canvas, clearMovementKeys);
-      
-      // Handle floor item interactions (F key)
-      handleFloorInteractions(canvas);
-      
-      // =============================================================================
-      // RENDER PHASE
-      // =============================================================================
-      
-      // Render 3D scene
-      render();
-      
-      // Render development minimap
-      renderMinimap();
-      
-=======
 
       // Handle gallery painting interactions
       await updateGalleryInteractions(canvas, clearMovementKeys);
@@ -1773,457 +914,11 @@
       }
 
 
->>>>>>> electromalina/main
       // Schedule next frame
       requestAnimationFrame(gameLoop);
     }
 
     // =============================================================================
-<<<<<<< HEAD
-=======
-    // ACCORDION TOGGLE
-    // =============================================================================
-
-    function setupAccordion(headerId, accordionId) {
-      const header = document.getElementById(headerId);
-      const accordion = document.getElementById(accordionId);
-      const content = accordion?.querySelector('.accordion-content');
-      const body = content?.querySelector('.accordion-body');
-
-      if (header && accordion && content && body) {
-        // Set initial state
-        content.style.maxHeight = '0px';
-        
-        header.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const isExpanded = accordion.classList.contains('expanded');
-          
-          if (isExpanded) {
-            // Collapse
-            accordion.classList.remove('expanded');
-            content.style.maxHeight = '0px';
-          } else {
-            // Expand - use fixed max-height to prevent page expansion
-            accordion.classList.add('expanded');
-            content.style.maxHeight = '300px';
-          }
-        });
-      }
-    }
-
-    // Initialize accordions after DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        setupAccordion('controlsHeader', 'controlsAccordion');
-        setupAccordion('uploadsHeader', 'uploadsAccordion');
-      });
-    } else {
-      setupAccordion('controlsHeader', 'controlsAccordion');
-      setupAccordion('uploadsHeader', 'uploadsAccordion');
-    }
-
-    // =============================================================================
->>>>>>> electromalina/main
-    // START APPLICATION
-    // =============================================================================
-
-    // Start the game loop
-    requestAnimationFrame(gameLoop);
-
-    // =============================================================================
-    // DEBUG INFORMATION
-    // =============================================================================
-
-    console.log('🎨 Flipboard Gallery Room');
-    console.log('📁 Modular architecture loaded');
-    console.log('🎯 Target FPS:', TARGET_FPS);
-    console.log('🖼️ Gallery paintings loaded from API');
-    console.log('🗺️ World map initialized');
-    console.log('🎮 Controls: WASD/Arrow keys to move, QE to turn, F to interact');
-    console.log('🖼️ Look at paintings closely to trigger them');
-<<<<<<< HEAD
-    
-    // Manual refresh function for debugging
-    window.refreshGallery = refreshGallery;
-    console.log('💡 Type refreshGallery() in console to manually refresh paintings');
-
-    // =============================================================================
-    // FLIPDOT CAST CONTROLS
-    // =============================================================================
-
-    const flipdotCastBtn = document.getElementById('flipdotCastBtn');
-    const flipdotLocalCastBtn = document.getElementById('flipdotLocalCastBtn');
-    const flipdotStatusEl = document.getElementById('flipdotStatus');
-    const flipdotStatusText = flipdotStatusEl?.querySelector('.flipdot-status-text');
-    const flipdotStatusMeta = document.getElementById('flipdotStatusMeta');
-    const flipdotLocalStatusEl = document.getElementById('flipdotLocalStatus');
-    const flipdotLocalStatusText = flipdotLocalStatusEl?.querySelector('.flipdot-status-text');
-    const flipdotLocalStatusMeta = document.getElementById('flipdotLocalStatusMeta');
-
-    // Use Vercel API routes instead of localhost
-    const FLIPDOT_API_BASE = window.location.origin; // Uses current domain (Vercel)
-    const FLIPDOT_LOCAL_BASE = 'http://localhost:3000'; // Local development server
-
-    const flipdotStreamState = {
-      running: false,
-      sending: false,
-      framesSent: 0,
-      frameQueue: [],
-      maxQueueSize: 2, // Max 2 frames in queue to prevent memory issues
-      timeoutId: null,
-      frameInterval: 1000 / TARGET_FPS, // Exact interval in ms (66.666...ms for 15 FPS)
-      captureCanvas: null,
-      captureCtx: null,
-      nextFrameTime: 0,
-      droppedFrames: 0,
-      nextFrameNumber: 1,
-      isLocal: false // Track if we're casting to local or Vercel
-    };
-
-    // Initialize capture canvas for compositing
-    if (canvas && post) {
-      flipdotStreamState.captureCanvas = document.createElement('canvas');
-      flipdotStreamState.captureCanvas.width = 84;
-      flipdotStreamState.captureCanvas.height = 28;
-      flipdotStreamState.captureCtx = flipdotStreamState.captureCanvas.getContext('2d');
-    }
-
-    if (flipdotCastBtn) {
-      flipdotCastBtn.addEventListener('click', () => {
-        if (flipdotStreamState.running && !flipdotStreamState.isLocal) {
-          stopFlipdotStream('Flipdot stream paused');
-        } else {
-          startFlipdotStream().catch((error) => {
-            console.error('[flipdot] Failed to start cast', error);
-            setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream idle');
-          });
-        }
-      });
-    }
-
-    // Local preview cast button
-    if (flipdotLocalCastBtn) {
-      flipdotLocalCastBtn.addEventListener('click', () => {
-        if (flipdotStreamState.running && flipdotStreamState.isLocal) {
-          stopFlipdotStream('Local preview stopped');
-        } else if (!flipdotStreamState.running) {
-          startFlipdotStream(true).catch((error) => { // true = isLocal
-            console.error('[flipdot] Failed to start local cast', error);
-            setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream idle');
-          });
-        }
-      });
-    }
-
-    if (flipdotStatusEl) {
-      refreshFlipdotStatus({ silent: true });
-      setInterval(() => {
-        if (!flipdotStreamState.running) {
-          refreshFlipdotStatus({ silent: true });
-        }
-      }, 15000);
-    }
-
-    async function startFlipdotStream(isLocal = false) {
-      if (flipdotStreamState.running) {
-        return;
-      }
-
-      flipdotStreamState.isLocal = isLocal;
-      const btn = isLocal ? flipdotLocalCastBtn : flipdotCastBtn;
-      const statusEl = isLocal ? flipdotLocalStatusEl : flipdotStatusEl;
-      const statusText = isLocal ? flipdotLocalStatusText : flipdotStatusText;
-      const statusMeta = isLocal ? flipdotLocalStatusMeta : flipdotStatusMeta;
-
-      if (!btn) return;
-
-      console.log(`[flipdot] Starting ${isLocal ? 'local' : 'Vercel'} live stream @`, TARGET_FPS, 'FPS');
-      console.log('[flipdot] Frame interval:', flipdotStreamState.frameInterval.toFixed(2), 'ms');
-      
-      if (statusEl) {
-        statusEl.style.display = 'block';
-        if (statusText) statusText.textContent = `Starting ${isLocal ? 'local preview' : 'flipdot'} stream...`;
-        statusEl.setAttribute('data-state', 'pending');
-        if (statusMeta) statusMeta.textContent = `Target: ${TARGET_FPS} FPS`;
-      }
-      
-      btn.classList.add('is-active');
-      btn.textContent = isLocal ? '⏹ Stop Local Preview' : '⏹ Stop Casting';
-      flipdotStreamState.running = true;
-      flipdotStreamState.framesSent = 0;
-      flipdotStreamState.droppedFrames = 0;
-      flipdotStreamState.frameQueue = [];
-      flipdotStreamState.nextFrameNumber = 1;
-      flipdotStreamState.nextFrameTime = performance.now();
-
-      // Start the frame loop - no intervals, just precise timing
-      captureAndScheduleNext();
-
-      return true;
-    }
-
-    function captureAndScheduleNext() {
-      if (!flipdotStreamState.running) {
-        return;
-      }
-
-      const now = performance.now();
-      
-      // Capture frame immediately (synchronous operation)
-      const frameDataUrl = composeFlipdotFrame();
-      
-      if (frameDataUrl) {
-        // Add to queue if not full, otherwise drop oldest
-        if (flipdotStreamState.frameQueue.length >= flipdotStreamState.maxQueueSize) {
-          flipdotStreamState.frameQueue.shift(); // Remove oldest
-          flipdotStreamState.droppedFrames += 1;
-        }
-        
-        flipdotStreamState.frameQueue.push({
-          dataUrl: frameDataUrl,
-          frameNumber: flipdotStreamState.nextFrameNumber++,
-          timestamp: Date.now()
-        });
-      }
-
-      // Process queue asynchronously (non-blocking) - don't await
-      if (!flipdotStreamState.sending) {
-        processFrameQueue().catch((error) => {
-          console.error('[flipdot] Frame queue processing error', error);
-          // Don't stop stream on single error, just log it
-        });
-      }
-
-      // Calculate when next frame should be captured
-      flipdotStreamState.nextFrameTime += flipdotStreamState.frameInterval;
-      
-      // Calculate wait time until next frame
-      const waitTime = flipdotStreamState.nextFrameTime - performance.now();
-      
-      // Schedule next frame capture - wait exactly the right amount
-      if (waitTime > 0) {
-        flipdotStreamState.timeoutId = setTimeout(captureAndScheduleNext, waitTime);
-      } else {
-        // If we're behind schedule, catch up immediately but adjust next frame time
-        flipdotStreamState.nextFrameTime = now + flipdotStreamState.frameInterval;
-        flipdotStreamState.timeoutId = setTimeout(captureAndScheduleNext, flipdotStreamState.frameInterval);
-      }
-    }
-
-    function stopFlipdotStream(message = 'Flipdot stream stopped', { skipStatus = false } = {}) {
-      if (!flipdotStreamState.running) {
-        return;
-      }
-      
-      // Clear timeout
-      if (flipdotStreamState.timeoutId) {
-        clearTimeout(flipdotStreamState.timeoutId);
-        flipdotStreamState.timeoutId = null;
-      }
-      
-      flipdotStreamState.running = false;
-      flipdotStreamState.sending = false;
-      flipdotStreamState.frameQueue = []; // Clear queue
-      flipdotStreamState.nextFrameNumber = 1; // Reset frame counter
-      
-      const isLocal = flipdotStreamState.isLocal;
-      const btn = isLocal ? flipdotLocalCastBtn : flipdotCastBtn;
-      const statusEl = isLocal ? flipdotLocalStatusEl : flipdotStatusEl;
-      const statusText = isLocal ? flipdotLocalStatusText : flipdotStatusText;
-      const statusMeta = isLocal ? flipdotLocalStatusMeta : flipdotStatusMeta;
-      
-      if (btn) {
-        btn.classList.remove('is-active');
-        btn.textContent = isLocal ? '🎬 Cast to Local Preview' : '▶️ Cast to Flipdot Board';
-      }
-      
-      if (!skipStatus && statusEl && statusText) {
-        const droppedInfo = flipdotStreamState.droppedFrames > 0 
-          ? ` (${flipdotStreamState.droppedFrames} dropped)` 
-          : '';
-        statusText.textContent = `${message} · ${flipdotStreamState.framesSent} frames${droppedInfo}`;
-        statusEl.setAttribute('data-state', 'idle');
-        if (statusMeta) statusMeta.textContent = isLocal ? 'localhost:3000' : `Target: ${TARGET_FPS} FPS`;
-        if (isLocal) statusEl.style.display = 'none';
-      }
-    }
-
-    async function processFrameQueue() {
-      // Don't process if already sending or queue is empty
-      if (flipdotStreamState.sending || flipdotStreamState.frameQueue.length === 0) {
-        return;
-      }
-
-      // Get the oldest frame from queue
-      const frame = flipdotStreamState.frameQueue.shift();
-      if (!frame) {
-        return;
-      }
-
-      flipdotStreamState.sending = true;
-
-      try {
-        const payload = {
-          dataUrl: frame.dataUrl,
-          meta: {
-            requestedFps: TARGET_FPS,
-            frameNumber: frame.frameNumber,
-            timestamp: frame.timestamp
-          }
-        };
-
-        // Use AbortController with timeout to prevent hangs
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-        // Use local or Vercel API based on casting mode
-        const apiUrl = flipdotStreamState.isLocal 
-          ? `${FLIPDOT_LOCAL_BASE}/api/flipdot/push-frame`
-          : `${FLIPDOT_API_BASE}/api/flipdot/push-frame`;
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorBody = await response.text().catch(() => 'Unknown error');
-          throw new Error(`HTTP ${response.status}: ${errorBody}`);
-        }
-
-        const result = await response.json();
-        flipdotStreamState.framesSent += 1;
-
-        // Log every second (every 15 frames at 15 FPS)
-        if (flipdotStreamState.framesSent % TARGET_FPS === 0) {
-          const droppedInfo = flipdotStreamState.droppedFrames > 0 
-            ? ` (${flipdotStreamState.droppedFrames} dropped)` 
-            : '';
-          console.log(
-            `[flipdot] streamed ${flipdotStreamState.framesSent} frames @ ${TARGET_FPS} FPS${droppedInfo}`,
-            result
-          );
-        }
-
-        const metaLabel = result?.bytes
-          ? `${formatBytes(result.bytes)} payload`
-          : `Target: ${TARGET_FPS} FPS`;
-
-        setFlipdotStatus(
-          `Streaming ${TARGET_FPS} FPS · frame ${flipdotStreamState.framesSent}`,
-          'ready',
-          metaLabel
-        );
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.warn('[flipdot] Frame send timeout, skipping');
-          flipdotStreamState.droppedFrames += 1;
-        } else {
-          console.error('[flipdot] Unable to dispatch frame', error);
-          // Don't stop stream on single frame error, just log it
-          flipdotStreamState.droppedFrames += 1;
-        }
-      } finally {
-        flipdotStreamState.sending = false;
-        // Continue processing queue if there are more frames - use setTimeout to prevent stack overflow
-        if (flipdotStreamState.frameQueue.length > 0 && flipdotStreamState.running) {
-          setTimeout(() => processFrameQueue(), 0);
-        }
-      }
-    }
-
-    function composeFlipdotFrame() {
-      const ctx = flipdotStreamState.captureCtx;
-      const target = flipdotStreamState.captureCanvas;
-      if (!ctx || !target) {
-        return null;
-      }
-      ctx.clearRect(0, 0, target.width, target.height);
-      if (canvas) {
-        ctx.drawImage(canvas, 0, 0, target.width, target.height);
-      }
-      if (post) {
-        ctx.drawImage(post, 0, 0, target.width, target.height);
-      }
-      return target.toDataURL('image/png');
-    }
-
-    async function refreshFlipdotStatus({ silent = false } = {}) {
-      if (!flipdotStatusEl || flipdotStreamState.running) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${FLIPDOT_API_BASE}/api/flipdot/status`, {
-          method: 'GET',
-          headers: { 'Cache-Control': 'no-store' }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const status = await response.json();
-        if (!silent) {
-          console.log('[flipdot] Live status:', status);
-        }
-
-        const live = status.live ?? {};
-        const frameInterval = live.frameIntervalMs ?? Math.round(1000 / TARGET_FPS);
-        const fps = frameInterval ? Math.round(1000 / frameInterval) : TARGET_FPS;
-        const dispatched = live.framesDispatched ?? 0;
-        const uptimeSec = live.uptimeMs ? Math.round(live.uptimeMs / 1000) : 0;
-
-        setFlipdotStatus(
-          `Live ${fps} FPS · ${dispatched} frames · ${uptimeSec}s uptime`,
-          'ready',
-          `Frame interval: ${frameInterval} ms`
-        );
-      } catch (error) {
-        if (!silent) {
-          console.warn('[flipdot] Status check failed', error);
-        }
-        setFlipdotStatus('Flipdot caster offline', 'error', 'Awaiting stream');
-      }
-    }
-
-    function setFlipdotStatus(message, state = 'idle', metaText) {
-      if (!flipdotStatusEl) {
-        return;
-      }
-      if (flipdotStatusText) {
-        flipdotStatusText.textContent = message;
-      }
-      flipdotStatusEl.dataset.state = state;
-      if (flipdotStatusMeta) {
-        flipdotStatusMeta.textContent = metaText ?? `Target: ${TARGET_FPS} FPS`;
-      }
-    }
-
-    function formatBytes(bytes) {
-      if (typeof bytes !== 'number' || Number.isNaN(bytes)) {
-        return `Target: ${TARGET_FPS} FPS`;
-      }
-      const units = ['B', 'KB', 'MB'];
-      let size = bytes;
-      let unit = 0;
-      while (size >= 1024 && unit < units.length - 1) {
-        size /= 1024;
-        unit += 1;
-      }
-      const precision = unit === 0 ? 0 : 1;
-      return `${size.toFixed(precision)} ${units[unit]}`;
-    }
-  </script>
-</body>
-</html>
-=======
 
     // Manual refresh function for debugging
     window.refreshGallery = refreshGallery;
@@ -2232,4 +927,3 @@
 </body>
 
 </html>
->>>>>>> electromalina/main

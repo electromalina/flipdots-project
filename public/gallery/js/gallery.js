@@ -56,36 +56,16 @@ async function loadGalleryData() {
   console.log('🎨 Loading gallery data from API...');
 
   try {
-<<<<<<< HEAD
-    const apiUrls = [];
-    const customApiBase =
-      (typeof window !== 'undefined' && (window.GALLERY_API_BASE || window.FLIPDOT_API_BASE)) || null;
-
-    if (customApiBase) {
-      const normalized = customApiBase.replace(/\/$/, '');
-      apiUrls.push(`${normalized}/api/uploads`, `${normalized}/uploads`);
-    }
-
-    apiUrls.push('https://i558110.hera.fontysict.net/api-testing/uploads');
-
-    apiUrls.push(
-=======
     // Try multiple API endpoints (Next.js API routes first)
     const apiUrls = [
->>>>>>> electromalina/main
       '/api/uploads',
       '/uploads',
       './api/uploads',
       './uploads',
       'api/uploads',
-<<<<<<< HEAD
-      'uploads'
-    );
-=======
       'uploads',
       'https://i558110.hera.fontysict.net/api-testing/uploads'
     ];
->>>>>>> electromalina/main
 
     let uploads = null;
     for (const apiUrl of apiUrls) {
@@ -242,7 +222,6 @@ function updateGalleryFrames(uploads) {
       timestamp: upload.timestamp || new Date().toISOString(),
       lastTrigger: 0,
       colorIndex: i,  // Store color index for minimap matching
-<<<<<<< HEAD
       uploadIndex: i, // Store original upload index
       svg: iconPaths[i % iconPaths.length]
     });
@@ -259,8 +238,9 @@ function updateGalleryFrames(uploads) {
       title: 'Empty Slot',
       user: 'system',
       timestamp: new Date().toISOString(),
-<<<<<<< HEAD
       lastTrigger: 0,
+      colorIndex: Math.floor(Math.random() * 6),
+      svg: demoFrames[i]?.svg || ICON_PATHS[i % ICON_PATHS.length]
     });
   }
 
@@ -268,11 +248,7 @@ function updateGalleryFrames(uploads) {
 
   // Log painting info for debugging
   galleryFrames.forEach((frame, i) => {
-<<<<<<< HEAD
-    console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y})`);
-=======
     console.log(`🖼️ Painting ${i + 1}: "${frame.title}" by ${frame.user} at (${frame.x}, ${frame.y}) img:${frame.svg}`);
->>>>>>> electromalina/main
   });
 }
 

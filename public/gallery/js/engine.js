@@ -97,46 +97,9 @@ export function initializeEngine(mainCanvas, postCanvas, minimapCanvas) {
   if (!useThree) {
     fctx = canvas.getContext('2d', { willReadFrequently: true });
   }
-<<<<<<< HEAD
-=======
   
   // Load icon images for gallery frames (static list)
   loadSVGImages();
-}
-
-/**
- * Load images for gallery frames
- */
-function loadSVGImages() {
-  const uniqueSvgs = new Set(ICON_PATHS);
-  let loadedCount = 0;
-  const totalCount = uniqueSvgs.size;
-  
-  if (totalCount === 0) {
-    svgsLoaded = true;
-    return;
-  }
-
-  uniqueSvgs.forEach(svgPath => {
-    const img = new Image();
-    img.onload = () => {
-      svgImages.set(svgPath, img);
-      loadedCount++;
-      if (loadedCount === totalCount) {
-        svgsLoaded = true;
-        console.log('🖼️ All gallery icons loaded');
-      }
-    };
-    img.onerror = () => {
-      console.error('Failed to load gallery icon:', svgPath);
-      loadedCount++;
-      if (loadedCount === totalCount) {
-        svgsLoaded = true;
-      }
-    };
-    img.src = svgPath;
-  });
->>>>>>> electromalina/main
 }
 
 // =============================================================================
@@ -315,30 +278,6 @@ export function render() {
         }
       }
     }
-        for (let t = -Math.floor(FRAME_THICKNESS / 2); t <= Math.floor((FRAME_THICKNESS - 1) / 2); t++) {
-          const cx = colCenter + t;
-          if (cx >= 0 && cx < canvas.width) frameCols[cx] = true;
-=======
-      const dist = Math.hypot(dx, dy);
-      const colFloat = (delta / halfFov) * (canvas.width / 2) + (canvas.width / 2);
-      const colCenter = Math.round(colFloat);
-      
-      for (let t = -Math.floor(FRAME_THICKNESS / 2); t <= Math.floor((FRAME_THICKNESS - 1) / 2); t++) {
-        const cx = colCenter + t;
-        if (cx >= 0 && cx < canvas.width) {
-          const wallDist = colDepth[cx] * 8; // Convert normalized depth back to distance
-          
-          if (Math.abs(dist - wallDist) < 0.5 || dist <= wallDist) {
-            if (dist < frameDepths[cx]) {
-              frameCols[cx] = true;
-              frameIndices[cx] = i;
-              frameDepths[cx] = dist;
-            }
-          }
->>>>>>> electromalina/main
-        }
-      }
-    }
   }
 
   // Render to main canvas
@@ -374,35 +313,6 @@ function renderOverlay(yTop, yBot, cornerCols, frameCols, frameIndices) {
     if (y1 > y0) pctx.fillRect(x, y0, 1, y1 - y0);
   }
 
-<<<<<<< HEAD
-  // Draw gallery frames
-  pctx.fillStyle = '#fff';
-  let frameLeft = null, frameRight = null, frameY0 = 0, frameY1 = 0;
-  
-  for (let x = 0; x < canvas.width; x++) {
-    if (!frameCols[x]) continue;
-    const y0 = Math.max(0, yTop[x]);
-    const y1 = Math.min(post.height, yBot[x]);
-    
-    const inset = Math.max(1, Math.floor((y1 - y0) * 0.2));
-    const sy0 = y0 + inset;
-    const sy1 = y1 - inset;
-    
-    if (sy1 > sy0) pctx.fillRect(x, sy0, 1, sy1 - sy0);
-    
-    if (frameLeft === null || x < frameLeft) frameLeft = x;
-    if (frameRight === null || x > frameRight) frameRight = x;
-    frameY0 = sy0; 
-    frameY1 = sy1;
-  }
-  
-  if (frameLeft !== null && frameRight !== null && frameRight >= frameLeft) {
-    pctx.fillRect(frameLeft, frameY0, frameRight - frameLeft + 1, 1);
-    pctx.fillRect(frameLeft, frameY1, frameRight - frameLeft + 1, 1);
-  }
-
-  // Draw wall edge lines
-=======
   // Draw gallery frames with textures
   if (svgsLoaded) {
     // First pass: compute bounds for each frame index
@@ -503,31 +413,18 @@ function renderOverlay(yTop, yBot, cornerCols, frameCols, frameIndices) {
   }
 
   // Wall edge lines
->>>>>>> electromalina/main
   pctx.fillStyle = '#fff';
   for (let x = 0; x < canvas.width; x++) {
     const topY = Math.max(0, Math.min(post.height - 1, yTop[x]));
     const botY = Math.max(0, Math.min(post.height - 1, yBot[x] - 1));
     const s = smoothSize[x];
-<<<<<<< HEAD
-    
-    const thickness = (s > 0.66) ? 3 : (s > 0.33 ? 2 : 1);
-    
-=======
 
     const thickness = (s > 0.66) ? 3 : (s > 0.33 ? 2 : 1);
 
->>>>>>> electromalina/main
     pctx.fillRect(x, Math.max(0, topY - Math.floor((thickness - 1) / 2)), 1, thickness);
     pctx.fillRect(x, Math.max(0, botY - Math.floor(thickness / 2)), 1, thickness);
   }
 }
-
-<<<<<<< HEAD
-=======
-
->>>>>>> electromalina/main
-// =============================================================================
 // MINIMAP RENDERING (CIRCULAR VERSION)
 // =============================================================================
 

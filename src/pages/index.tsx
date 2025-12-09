@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function Home() {
   return (
@@ -81,7 +82,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       <style jsx>{`
         .container {
           max-width: 1000px;
@@ -131,76 +131,6 @@ export default function Home() {
           border-radius: 16px !important;
           text-decoration: none !important;
           font-weight: 700 !important;
-          font-size: 1.1em !important;
-          text-align: center !important;
-          transition: all 0.3s ease !important;
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
-          border: 3px solid #04626C !important;
-          min-width: 250px !important;
-          display: inline-block !important;
-          cursor: pointer !important;
-        }
-
-        .secondary-buttons {
-          display: flex;
-          gap: 20px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .feature-card {
-          background: white;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          text-align: center;
-        }
-
-        .features {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
-          margin: 30px 0;
-        }
-
-        .endpoints {
-          background: white;
-          padding: 20px;
-          border-radius: 12px;
-          margin: 20px 0;
-        }
-
-        .endpoint-list { display: flex; flex-direction: column; gap: 10px; }
-
-        .method { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-        .method.get { background: #27ae60; color: white; }
-        .method.post { background: #e74c3c; color: white; }
-
-        .endpoint-url { font-family: 'Monaco', monospace; color: #3498db; }
-
-        code { background: #1a1a1a; color: #04626C; padding: 2px 6px; border-radius: 4px; }
-
-        @media (max-width: 768px) {
-          .container { padding: 20px 15px; }
-          .main-button { min-width: 200px; padding: 14px 28px; }
-          .features { grid-template-columns: 1fr; }
-        }
-      `}</style>
-
-      <style jsx global>{`
-        body { margin: 0; padding: 0; background: #000000; }
-        * { box-sizing: border-box; }
-      `}</style>
-    </>
-  );
-}
-        .main-button {
-          background: #04626C !important;
-          color: #ffffff !important;
-          padding: 20px 50px !important;
-          border-radius: 16px !important;
-          text-decoration: none !important;
-          font-weight: 700 !important;
           font-size: 1.3em !important;
           text-align: center !important;
           transition: all 0.3s ease !important;
@@ -240,10 +170,64 @@ export default function Home() {
           color: #ffffff;
         }
 
+        .feature-card {
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          text-align: center;
+        }
+
+        .features {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin: 30px 0;
+        }
+
+        .endpoints {
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          margin: 20px 0;
+        }
+
+        .endpoint-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .endpoint-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .method {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+        }
+
+        .method.get {
+          background: #27ae60;
+          color: white;
+        }
+
+        .method.post {
+          background: #e74c3c;
+          color: white;
+        }
+
+        .endpoint-url {
+          font-family: 'Monaco', monospace;
+          color: #3498db;
+        }
+
         code {
           background: #1a1a1a;
           color: #04626C;
->>>>>>> electromalina/main
           padding: 2px 6px;
           border-radius: 4px;
           font-family: 'Monaco', 'Courier New', monospace;
@@ -254,7 +238,6 @@ export default function Home() {
             padding: 20px 15px;
           }
 
-<<<<<<< HEAD
           h1 {
             font-size: 2.5em;
           }
@@ -269,15 +252,6 @@ export default function Home() {
             gap: 10px;
           }
 
-          .actions {
-            flex-direction: column;
-            align-items: center;
-          }
-
-          .btn {
-            width: 200px;
-            text-align: center;
-=======
           .main-button {
             min-width: 200px;
             padding: 18px 40px;
@@ -288,7 +262,6 @@ export default function Home() {
           .secondary-buttons {
             flex-direction: column;
             width: 100%;
->>>>>>> electromalina/main
           }
         }
       `}</style>
@@ -297,23 +270,16 @@ export default function Home() {
         body {
           margin: 0;
           padding: 0;
-<<<<<<< HEAD
-          background: #f5f5f5;
-=======
           background: #000000;
->>>>>>> electromalina/main
         }
 
         * {
           box-sizing: border-box;
         }
-<<<<<<< HEAD
-=======
 
         a {
           color: #cccccc;
         }
->>>>>>> electromalina/main
       `}</style>
     </>
   );
