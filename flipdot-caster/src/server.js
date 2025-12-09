@@ -62,7 +62,6 @@ app.post('/api/push-frame', async (req, res) => {
     res.status(500).json({ error: error.message ?? 'Failed to dispatch frame' });
   }
 });
-
 app.post('/api/push-room', async (req, res) => {
   const overrides = req.body ?? {};
   const captureOptions = {
@@ -127,7 +126,6 @@ function enableCors(req, res, next) {
   }
   return next();
 }
-
 function pick(source, keys) {
   return keys.reduce((acc, key) => {
     if (source[key] !== undefined) {
@@ -152,7 +150,6 @@ function extractBase64(dataUrl, imageBase64) {
   }
   return null;
 }
-
 async function shutdown(signal) {
   console.log(`\nReceived ${signal}, shutting down gracefully...`);
   await liveService.stop().catch((error) => {

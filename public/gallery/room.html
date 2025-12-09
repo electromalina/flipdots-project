@@ -28,10 +28,23 @@
   - Mouse: Look around
   - Click paintings: Open GitHub repository in new tab
   
+<<<<<<< HEAD
   Author: Flipboard Project Team
   Last Updated: 2025
   =============================================================================
   -->
+=======
+  Author: Team NANO
+  Last Updated: 2025
+  =============================================================================
+  -->
+  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+  <script>
+    window._controllerIO = window.io;
+  </script>
+  <script type="module" src="./main.js"></script>
+
+>>>>>>> electromalina/main
   <meta charset="utf-8" />
   <title>🎨 Flipboard Gallery Room - Your API Uploads as Paintings</title>
   <style>
@@ -50,28 +63,7 @@
       border: 2px solid #333;                    /* Flipboard-style border */
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);   /* Subtle depth effect */
       margin: 0 auto;
-    }
     
-    /* Primary raycaster canvas - scaled 10x for visibility */
-    /* This canvas renders the 3D world view */
-    #v { 
-      image-rendering: pixelated;                /* Pixelated rendering for retro look */
-      width: 100%; 
-      height: 100%; 
-      background: #000;                          /* Black background */
-      display: block; 
-    }
-    
-    /* Overlay canvas for UI elements (pillars, frames, paintings) */
-    /* This canvas renders interactive elements on top of the 3D view */
-    #post { 
-      image-rendering: pixelated;                /* Pixelated rendering for consistency */
-      width: 100%; 
-      height: 100%; 
-      position: absolute; 
-      left: 0; 
-      top: 0; 
-      pointer-events: none; 
     }
     
     /* Development minimap */
@@ -99,21 +91,102 @@
     .minimap-legend {
       background: #000;
       border: 2px solid #fff;
+=======
+
+    /* Main game display container - native flipdot resolution: 84x28 */
+    .stage {
+      position: relative;
+      width: 840px;
+      /* 84px * 10 scale factor */
+      height: 280px;
+      /* 28px * 10 scale factor */
+      border: 2px solid #04626C;
+      /* Primary color border */
+      margin: 0 auto;
+      image-rendering: pixelated;
+      /* Crisp pixel rendering */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
+    }
+
+    /* Primary raycaster canvas - native resolution: 84x28 pixels */
+    /* This canvas renders the 3D world view at native flipdot resolution */
+    #v {
+      image-rendering: pixelated;
+      /* Pixelated rendering for retro look */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
+      width: 840px;
+      /* Native width * 10 scale */
+      height: 280px;
+      /* Native height * 10 scale */
+      background: #000;
+      /* Black background */
+      display: block;
+    }
+
+    /* Overlay canvas for UI elements (pillars, frames, paintings) */
+    /* This canvas renders interactive elements on top of the 3D view */
+    #post {
+      image-rendering: pixelated;
+      /* Pixelated rendering for consistency */
+      image-rendering: -moz-crisp-edges;
+      /* Firefox */
+      image-rendering: crisp-edges;
+      /* Standard */
+      width: 840px;
+      /* Native width * 10 scale */
+      height: 280px;
+      /* Native height * 10 scale */
+      position: absolute;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+    }
+
+    /* Development minimap - aligned with canvas height */
+    #mini {
+      image-rendering: pixelated;
+      width: 280px;
+      height: 280px;
+      background: #000;
+      border: 2px solid #04626C;
+      flex-shrink: 0;
+    }
+
+    .minimap-legend {
+      background: #000;
+      border: 2px solid #04626C;
+>>>>>>> electromalina/main
       padding: 16px 20px;
       font-size: 0.9em;
       color: #ccc;
       text-align: center;
       width: 100%;
       line-height: 1.6;
+<<<<<<< HEAD
       display: none; /* Hide legend for cleaner look */
     }
     
     .minimap-legend strong {
       color: #fff;
+=======
+      display: none;
+      /* Hide legend for cleaner look */
+    }
+
+    .minimap-legend strong {
+      color: #04626C;
+>>>>>>> electromalina/main
       display: block;
       margin-bottom: 10px;
       font-size: 1.05em;
     }
+<<<<<<< HEAD
     
     .minimap-legend div {
       margin: 6px 0;
@@ -243,11 +316,203 @@
       justify-content: center;
       width: 100%;
       height: 100%;
+=======
+
+    .minimap-legend div {
+      margin: 6px 0;
+    }
+
+
+    /* Center layout and flipboard theme */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #000;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    /* Main content wrapper */
+    .main-content {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    /* Header / Logo */
+    .header {
+      text-align: center;
+      flex-shrink: 0;
+      padding: 10px 0;
+      box-sizing: border-box;
+    }
+
+    .header img {
+      max-width: 250px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Main game container - minimap left, canvas right */
+    .game-container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* Minimap on the left */
+    .minimap-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    /* Game area with canvas on the right */
+    .game-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    /* Stage container */
+    .stage-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Accordion container below canvas area */
+    .accordion-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      padding: 0 10px;
+      margin-top: 20px;
+      box-sizing: border-box;
+      align-items: flex-start;
+    }
+
+    /* Accordion item */
+    .accordion-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #000;
+      border: 2px solid #04626C;
+      overflow: hidden;
+      max-width: 50%;
+    }
+
+    .accordion-header {
+      background: #000;
+      padding: 12px 16px;
+      color: #04626C;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1em;
+      font-weight: bold;
+      flex-shrink: 0;
+      border-bottom: 1px solid transparent;
+      transition: border-bottom-color 0.2s ease;
+    }
+
+    .accordion-header .header-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accordion-header .status-badge {
+      font-size: 0.85em;
+      color: #999;
+      font-weight: normal;
+    }
+
+    .accordion-item.expanded .accordion-header {
+      border-bottom-color: #04626C;
+    }
+
+    .accordion-toggle {
+      color: #04626C;
+      font-size: 0.9em;
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+
+    .accordion-item.expanded .accordion-toggle {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 1;
+      min-height: 0;
+    }
+
+
+    .accordion-body {
+      padding: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 300px;
+      box-sizing: border-box;
+    }
+
+    /* Custom scrollbar for accordion */
+    .accordion-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .accordion-body::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    .accordion-body::-webkit-scrollbar-thumb {
+      background: #333;
+      border: 1px solid #04626C;
+>>>>>>> electromalina/main
     }
 
     /* Controls panel */
     .controls {
       background: #000;
+<<<<<<< HEAD
       padding: 16px;
       border: 2px solid #fff;
       width: 100%;
@@ -373,6 +638,77 @@
     
     .upload-item .repo-name {
       color: #fff;
+=======
+      padding: 0;
+      width: 100%;
+    }
+
+    .controls h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #04626C;
+      font-size: 0.95em;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #04626C;
+    }
+
+    .controls h3:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    /* Uploads section */
+    .uploads-section {
+      background: #000;
+      padding: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .uploads-list {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .uploads-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .uploads-list::-webkit-scrollbar-track {
+      background: #000;
+    }
+
+    .uploads-list::-webkit-scrollbar-thumb {
+      background: #333;
+      border: 1px solid #04626C;
+    }
+
+    .upload-item {
+      background: #000;
+      border: 1px solid #333;
+      padding: 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .upload-item.loading {
+      text-align: center;
+      color: #666;
+      border-color: #333;
+    }
+
+    .upload-item.empty {
+      text-align: center;
+      color: #666;
+      border-color: #333;
+      font-style: italic;
+    }
+
+    .upload-item .repo-name {
+      color: #04626C;
+>>>>>>> electromalina/main
       font-weight: bold;
       margin-bottom: 8px;
       font-size: 0.95em;
@@ -382,6 +718,7 @@
       align-items: center;
       gap: 8px;
     }
+<<<<<<< HEAD
     
     .minimap-color-indicator {
       width: 16px;
@@ -404,12 +741,23 @@
       }
     }
     
+=======
+
+    .minimap-color-indicator {
+      width: 14px;
+      height: 14px;
+      border: 1px solid;
+      flex-shrink: 0;
+    }
+
+>>>>>>> electromalina/main
     .upload-item .repo-info {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 8px;
       font-size: 0.75em;
+<<<<<<< HEAD
       color: #ccc;
     }
     
@@ -455,6 +803,26 @@
       pointer-events: none;
     }
 
+=======
+      color: #999;
+    }
+
+    .upload-item .repo-info span {
+      background: #000;
+      padding: 3px 6px;
+      border: 1px solid #333;
+    }
+
+    .upload-item .github-link {
+      display: inline-block;
+      color: #04626C;
+      text-decoration: none;
+      border: 1px solid #04626C;
+      padding: 6px 12px;
+      font-size: 0.85em;
+      margin-top: 6px;
+    }
+>>>>>>> electromalina/main
 
     .controls ul {
       list-style: none;
@@ -465,8 +833,11 @@
     .controls li {
       padding: 4px 0;
       color: #ccc;
+<<<<<<< HEAD
       position: relative;
       z-index: 1;
+=======
+>>>>>>> electromalina/main
       line-height: 1.4;
       font-size: 0.9em;
     }
@@ -474,6 +845,7 @@
     .controls .key {
       background: #000;
       padding: 2px 6px;
+<<<<<<< HEAD
       border: 1px solid #fff;
       font-weight: bold;
       color: #fff;
@@ -522,6 +894,17 @@
       position: relative;
       z-index: 1;
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+=======
+      border: 1px solid #04626C;
+      font-weight: bold;
+      color: #04626C;
+      margin-right: 8px;
+    }
+
+    /* Status panel - minimal inline */
+    .status {
+      display: none;
+>>>>>>> electromalina/main
     }
 
     /* Loading indicator */
@@ -534,7 +917,10 @@
       font-family: monospace;
       font-size: 18px;
       text-align: center;
+<<<<<<< HEAD
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+=======
+>>>>>>> electromalina/main
     }
 
     .loading::after {
@@ -543,6 +929,7 @@
     }
 
     @keyframes dots {
+<<<<<<< HEAD
       0%, 20% { content: ''; }
       40% { content: '.'; }
       60% { content: '..'; }
@@ -814,18 +1201,117 @@
         height: 140px;
       }
       
+=======
+
+      0%,
+      20% {
+        content: '';
+      }
+
+      40% {
+        content: '.';
+      }
+
+      60% {
+        content: '..';
+      }
+
+      80%,
+      100% {
+        content: '...';
+      }
+    }
+
+
+    /* Responsive design */
+    @media (max-width: 1200px) {
+      .game-container {
+        gap: 12px;
+      }
+
+>>>>>>> electromalina/main
       #mini {
         width: 240px;
         height: 240px;
       }
+<<<<<<< HEAD
       
       .minimap-legend {
         font-size: 0.75em;
         padding: 10px 12px;
+=======
+
+      .header img {
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .game-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .accordion-container {
+        flex-direction: column;
+      }
+
+      /* Scale down to 7.5x (maintains 3:1 aspect ratio) */
+      .stage {
+        width: 630px;
+        /* 84px * 7.5 */
+        height: 210px;
+        /* 28px * 7.5 */
+      }
+
+      #v {
+        width: 630px;
+        height: 210px;
+      }
+
+      #post {
+        width: 630px;
+        height: 210px;
+      }
+
+      #mini {
+        width: 200px;
+        height: 200px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .header img {
+        max-width: 150px;
+      }
+
+      /* Scale down to 5x (maintains 3:1 aspect ratio) */
+      .stage {
+        width: 420px;
+        /* 84px * 5 */
+        height: 140px;
+        /* 28px * 5 */
+      }
+
+      #v {
+        width: 420px;
+        height: 140px;
+      }
+
+      #post {
+        width: 420px;
+        height: 140px;
+      }
+
+      #mini {
+        width: 180px;
+        height: 180px;
+>>>>>>> electromalina/main
       }
     }
   </style>
 </head>
+<<<<<<< HEAD
 <body>
   <div class="main-content">
     <div class="header">
@@ -866,22 +1352,92 @@
       <div class="game-area">
         <div class="stage-wrapper">
           <div class="stage">
+=======
+
+<body>
+  <div class="main-content">
+    <div class="header">
+      <img src="./logo.png" alt="Flipboard Gallery Room" />
+    </div>
+
+    <div class="game-container">
+      <div class="minimap-container">
+        <canvas id="mini" width="128" height="128"
+          title="Minimap - Colored dots show your gallery paintings"></canvas>
+        <div class="minimap-legend"></div>
+      </div>
+
+      <div class="game-area">
+        <div class="stage-wrapper">
+          <div class="stage">
+            <!-- Native flipdot resolution: 84x28 pixels (scaled 10x in CSS for visibility) -->
+>>>>>>> electromalina/main
             <canvas id="v" width="84" height="28"></canvas>
             <canvas id="post" width="84" height="28"></canvas>
             <div class="loading" id="loading">Loading 3D Room</div>
           </div>
         </div>
       </div>
+<<<<<<< HEAD
       
       <div class="uploads-sidebar">
         <h3>📋 All Uploads</h3>
         <div id="uploadsList" class="uploads-list">
           <div class="upload-item loading">Loading uploads...</div>
+=======
+    </div>
+
+    <div class="accordion-container">
+      <div class="accordion-item" id="controlsAccordion">
+        <div class="accordion-header" id="controlsHeader">
+          <span>Controls</span>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="controls">
+              <h3>Movement</h3>
+              <ul>
+                <li><span class="key">WASD</span> Move around</li>
+                <li><span class="key">Q/E</span> Turn left/right</li>
+                <li><span class="key">↑↓←→</span> Alternative movement</li>
+              </ul>
+
+              <h3>Gallery</h3>
+              <ul>
+                <li>Look closely at paintings to trigger them</li>
+                <li>Paintings open GitHub repository links</li>
+                <li>Gallery auto-updates every 30 seconds</li>
+                <li>Up to 6 most recent uploads displayed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="uploadsAccordion">
+        <div class="accordion-header" id="uploadsHeader">
+          <span class="header-text">
+            <span>All Uploads</span>
+            <span class="status-badge" id="uploadsStatusBadge"></span>
+          </span>
+          <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="uploads-section">
+              <div id="uploadsList" class="uploads-list">
+                <div class="upload-item loading">Loading uploads...</div>
+              </div>
+            </div>
+          </div>
+>>>>>>> electromalina/main
         </div>
       </div>
     </div>
   </div>
 
+<<<<<<< HEAD
   <div class="nav">
     <button id="flipdotCastBtn" class="flipdot-button">
       ▶️ Cast to Flipdot Board
@@ -895,12 +1451,22 @@
   <!-- Three.js for hardware acceleration -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
   
+=======
+
+  <!-- Three.js for hardware acceleration -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+>>>>>>> electromalina/main
   <!-- Main application script -->
   <script type="module">
     // =============================================================================
     // MAIN APPLICATION ENTRY POINT
     // =============================================================================
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> electromalina/main
     import { TARGET_FPS } from './js/config.js';
     import { updateMovement, handleFloorInteractions, clearMovementKeys } from './js/player.js';
     import { updateGalleryInteractions, getGalleryFrameCount, refreshGallery, getAllUploads, getMarkerColor, getGalleryFrameByUrl } from './js/gallery.js';
@@ -915,7 +1481,10 @@
     const post = document.getElementById('post');
     const mini = document.getElementById('mini');
     const loading = document.getElementById('loading');
+<<<<<<< HEAD
     const galleryStatus = document.getElementById('galleryStatus');
+=======
+>>>>>>> electromalina/main
     const uploadsList = document.getElementById('uploadsList');
 
     // Initialize the rendering engine
@@ -924,10 +1493,77 @@
     // Hide loading indicator
     loading.style.display = 'none';
 
+<<<<<<< HEAD
     // Update gallery status
     function updateGalleryStatus() {
       const count = getGalleryFrameCount();
       galleryStatus.textContent = `${count} paintings loaded from API`;
+=======
+
+    // =============================================================================
+    // CONTROLLER SETUP
+    // =============================================================================
+
+    import {
+      remoteMove,
+      remoteLook,
+      remoteMoveHold,
+      remoteLookHold
+    } from './js/player.js';
+
+    function setupController() {
+      const ioFn = window._controllerIO;
+      if (!ioFn) {
+        console.warn("Controller IO not available");
+        return;
+      }
+
+      // Connect to controller server
+      const socket = ioFn("http://localhost:4000");
+      window.controllerSocket = socket; // For debugging
+
+      console.log("📱 Controller connected");
+
+      // Tap-based movement
+      socket.on("move", dir => {
+        remoteMove(dir);
+      });
+
+      socket.on("look", dir => {
+        remoteLook(dir);
+      });
+
+      // Hold-based movement
+      socket.on("move_start", dir => {
+        remoteMoveHold(dir, true);
+      });
+
+      socket.on("move_stop", dir => {
+        remoteMoveHold(dir, false);
+      });
+
+      // Hold-based looking
+      socket.on("look_start", dir => {
+        remoteLookHold(dir, true);
+      });
+
+      socket.on("look_stop", dir => {
+        remoteLookHold(dir, false);
+      });
+    }
+
+    setupController();
+
+
+    // Update gallery status (in accordion badge only)
+    function updateGalleryStatus() {
+      const count = getGalleryFrameCount();
+      // Update accordion badge
+      const uploadsStatusBadge = document.getElementById('uploadsStatusBadge');
+      if (uploadsStatusBadge) {
+        uploadsStatusBadge.textContent = `(${count} paintings)`;
+      }
+>>>>>>> electromalina/main
     }
 
     // Update status initially and periodically
@@ -943,12 +1579,20 @@
      */
     function updateUploadsSidebar() {
       const uploads = getAllUploads();
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> electromalina/main
       if (!uploads || uploads.length === 0) {
         uploadsList.innerHTML = '<div class="upload-item empty">No uploads yet. Upload via Slack!</div>';
         return;
       }
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> electromalina/main
       uploadsList.innerHTML = uploads.map((upload, index) => {
         // Extract repo name from repository field or github_url
         let repoName = 'Unknown Repository';
@@ -960,6 +1604,7 @@
             repoName = match[1];
           }
         }
+<<<<<<< HEAD
         
         const userName = upload.slack_user || upload.user_name || 'Unknown User';
         const branch = upload.branch || 'main';
@@ -969,13 +1614,28 @@
         const galleryFrame = getGalleryFrameByUrl(upload.github_url);
         let colorIndicator = '';
         
+=======
+
+        const userName = upload.slack_user || upload.user_name || 'Unknown User';
+        const branch = upload.branch || 'main';
+        const timestamp = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : 'Unknown date';
+
+        // Find matching gallery frame to get color
+        const galleryFrame = getGalleryFrameByUrl(upload.github_url);
+        let colorIndicator = '';
+
+>>>>>>> electromalina/main
         if (galleryFrame !== null && galleryFrame.colorIndex !== undefined) {
           const color = getMarkerColor(galleryFrame.colorIndex);
           colorIndicator = `
             <div class="minimap-color-indicator" style="background-color: ${color}; border-color: ${color};" title="This color on minimap"></div>
           `;
         }
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> electromalina/main
         return `
           <div class="upload-item">
             <div class="repo-name">
@@ -983,11 +1643,19 @@
               <span>${repoName}</span>
             </div>
             <div class="repo-info">
+<<<<<<< HEAD
               <span>🌿 ${branch}</span>
               <span>👤 ${userName}</span>
               <span>📅 ${timestamp}</span>
             </div>
             <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">🔗 View on GitHub</a>
+=======
+              <span>${branch}</span>
+              <span>${userName}</span>
+              <span>${timestamp}</span>
+            </div>
+            <a href="${upload.github_url}" target="_blank" class="github-link" style="${galleryFrame && galleryFrame.colorIndex !== undefined ? `border-color: ${getMarkerColor(galleryFrame.colorIndex)};` : ''}">View on GitHub</a>
+>>>>>>> electromalina/main
           </div>
         `;
       }).join('');
@@ -997,12 +1665,20 @@
     setTimeout(() => {
       updateUploadsSidebar();
     }, 2500);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> electromalina/main
     // Listen for gallery update events
     window.addEventListener('galleryUpdated', () => {
       updateUploadsSidebar();
     });
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> electromalina/main
     // Also update periodically
     setInterval(() => {
       updateUploadsSidebar();
@@ -1018,20 +1694,33 @@
      * Main game loop - updates game state and renders frame
      * @param {number} now - Current timestamp
      */
+<<<<<<< HEAD
+=======
+    let lastMini = 0;
+>>>>>>> electromalina/main
     async function gameLoop(now) {
       // Calculate delta time with frame rate limiting
       const dt = Math.min(3, (now - last) / (1000 / TARGET_FPS));
       last = now;
+<<<<<<< HEAD
       
       // =============================================================================
       // UPDATE PHASE
       // =============================================================================
       
+=======
+
+      // =============================================================================
+      // UPDATE PHASE
+      // =============================================================================
+
+>>>>>>> electromalina/main
       // Update player movement and check if cache needs invalidation
       const playerMoved = updateMovement(dt);
       if (playerMoved) {
         invalidateCache(); // Invalidate rendering cache when player rotates
       }
+<<<<<<< HEAD
       
       // Handle gallery painting interactions
       await updateGalleryInteractions(canvas, clearMovementKeys);
@@ -1049,11 +1738,87 @@
       // Render development minimap
       renderMinimap();
       
+=======
+
+      // Handle gallery painting interactions
+      await updateGalleryInteractions(canvas, clearMovementKeys);
+
+      // Handle floor item interactions (F key)
+      handleFloorInteractions(canvas);
+
+      // =============================================================================
+      // RENDER PHASE
+      // =============================================================================
+
+      // Render 3D scene
+      render();
+
+      // Render development minimap
+      renderMinimap();
+      // SEND MINIMAP TO CONTROLLER @ 5fps
+      if (now - lastMini > 200) {
+        lastMini = now;
+        if (window.controllerSocket) {
+          const miniCanvas = document.getElementById('mini');
+          const dataUrl = miniCanvas.toDataURL("image/png");
+          window.controllerSocket.emit('minimap_frame', dataUrl);
+        }
+      }
+
+
+>>>>>>> electromalina/main
       // Schedule next frame
       requestAnimationFrame(gameLoop);
     }
 
     // =============================================================================
+<<<<<<< HEAD
+=======
+    // ACCORDION TOGGLE
+    // =============================================================================
+
+    function setupAccordion(headerId, accordionId) {
+      const header = document.getElementById(headerId);
+      const accordion = document.getElementById(accordionId);
+      const content = accordion?.querySelector('.accordion-content');
+      const body = content?.querySelector('.accordion-body');
+
+      if (header && accordion && content && body) {
+        // Set initial state
+        content.style.maxHeight = '0px';
+        
+        header.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const isExpanded = accordion.classList.contains('expanded');
+          
+          if (isExpanded) {
+            // Collapse
+            accordion.classList.remove('expanded');
+            content.style.maxHeight = '0px';
+          } else {
+            // Expand - use fixed max-height to prevent page expansion
+            accordion.classList.add('expanded');
+            content.style.maxHeight = '300px';
+          }
+        });
+      }
+    }
+
+    // Initialize accordions after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setupAccordion('controlsHeader', 'controlsAccordion');
+        setupAccordion('uploadsHeader', 'uploadsAccordion');
+      });
+    } else {
+      setupAccordion('controlsHeader', 'controlsAccordion');
+      setupAccordion('uploadsHeader', 'uploadsAccordion');
+    }
+
+    // =============================================================================
+>>>>>>> electromalina/main
     // START APPLICATION
     // =============================================================================
 
@@ -1071,6 +1836,7 @@
     console.log('🗺️ World map initialized');
     console.log('🎮 Controls: WASD/Arrow keys to move, QE to turn, F to interact');
     console.log('🖼️ Look at paintings closely to trigger them');
+<<<<<<< HEAD
     
     // Manual refresh function for debugging
     window.refreshGallery = refreshGallery;
@@ -1405,3 +2171,13 @@
   </script>
 </body>
 </html>
+=======
+
+    // Manual refresh function for debugging
+    window.refreshGallery = refreshGallery;
+    console.log('💡 Type refreshGallery() in console to manually refresh paintings');
+  </script>
+</body>
+
+</html>
+>>>>>>> electromalina/main

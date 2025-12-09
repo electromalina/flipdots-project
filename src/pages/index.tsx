@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Home() {
@@ -11,26 +10,41 @@ export default function Home() {
       </Head>
 
       <div className="container">
+        <div className="logo-container">
+          <img src="/gallery/logo.png" alt="ROOM" className="logo" />
+        </div>
+
         <h1>🎮 Flipboard Slack API</h1>
-        <p className="subtitle">Next.js backend for Slack flipboard integration</p>
-        
+        <p className="subtitle">Homepage for the Room and Slack API checks</p>
+
+        <div className="buttons-container">
+          <a href="/gallery/room.html" className="main-button btn-primary">
+            Enter the Room
+          </a>
+
+          <div className="secondary-buttons">
+            <Link href="/api">API Endpoints</Link>
+            <Link href="/api/health">API Health Check</Link>
+          </div>
+        </div>
+
         <div className="features">
           <div className="feature-card">
             <h3>⚡ Slack Integration</h3>
             <p>Use <code>/upload-flipboard</code> command in Slack to share GitHub repositories</p>
           </div>
-          
+
           <div className="feature-card">
             <h3>📊 Dashboard</h3>
             <p>View all uploaded repositories with user information and timestamps</p>
           </div>
-          
+
           <div className="feature-card">
             <h3>🔗 GitHub Links</h3>
             <p>Automatic validation and parsing of GitHub repository URLs</p>
           </div>
         </div>
-        
+
         <div className="endpoints">
           <h2>Available Endpoints</h2>
           <div className="endpoint-list">
@@ -61,19 +75,10 @@ export default function Home() {
             </div>
             <div className="endpoint-item">
               <span className="method get">GET</span>
-              <Link href="/gallery/room.html" className="endpoint-url">/gallery/room.html</Link>
+              <a href="/gallery/room.html" className="endpoint-url">/gallery/room.html</a>
               <span className="endpoint-desc">3D Gallery Room</span>
             </div>
           </div>
-        </div>
-        
-        <div className="actions">
-          <Link href="/dashboard" className="btn primary">
-            📊 View Dashboard
-          </Link>
-          <Link href="/api/uploads" className="btn secondary">
-            📋 API Data
-          </Link>
         </div>
       </div>
 
@@ -83,152 +88,162 @@ export default function Home() {
           margin: 0 auto;
           padding: 40px 20px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: #000000;
+          min-height: 100vh;
+        }
+
+        .logo-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+
+        .logo {
+          max-width: 300px;
+          height: auto;
         }
 
         h1 {
           color: #2c3e50;
           text-align: center;
           margin-bottom: 10px;
-          font-size: 3em;
+          font-size: 2.4em;
         }
 
         .subtitle {
           text-align: center;
-          color: #7f8c8d;
+          color: #cccccc;
           font-size: 1.2em;
-          margin-bottom: 50px;
+          margin-bottom: 30px;
         }
 
-        .features {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 30px;
-          margin: 50px 0;
+        .buttons-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .main-button {
+          background: #04626C !important;
+          color: #ffffff !important;
+          padding: 20px 50px !important;
+          border-radius: 16px !important;
+          text-decoration: none !important;
+          font-weight: 700 !important;
+          font-size: 1.1em !important;
+          text-align: center !important;
+          transition: all 0.3s ease !important;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+          border: 3px solid #04626C !important;
+          min-width: 250px !important;
+          display: inline-block !important;
+          cursor: pointer !important;
+        }
+
+        .secondary-buttons {
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
         .feature-card {
           background: white;
-          padding: 30px;
+          padding: 20px;
           border-radius: 12px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
           text-align: center;
         }
 
-        .feature-card h3 {
-          color: #3498db;
-          margin-bottom: 15px;
-          font-size: 1.3em;
-        }
-
-        .feature-card p {
-          color: #7f8c8d;
-          line-height: 1.6;
+        .features {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin: 30px 0;
         }
 
         .endpoints {
           background: white;
-          padding: 30px;
+          padding: 20px;
           border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          margin: 50px 0;
+          margin: 20px 0;
         }
 
-        .endpoints h2 {
-          color: #2c3e50;
-          margin-bottom: 25px;
-          text-align: center;
+        .endpoint-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .method { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .method.get { background: #27ae60; color: white; }
+        .method.post { background: #e74c3c; color: white; }
+
+        .endpoint-url { font-family: 'Monaco', monospace; color: #3498db; }
+
+        code { background: #1a1a1a; color: #04626C; padding: 2px 6px; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+          .container { padding: 20px 15px; }
+          .main-button { min-width: 200px; padding: 14px 28px; }
+          .features { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <style jsx global>{`
+        body { margin: 0; padding: 0; background: #000000; }
+        * { box-sizing: border-box; }
+      `}</style>
+    </>
+  );
+}
+        .main-button {
+          background: #04626C !important;
+          color: #ffffff !important;
+          padding: 20px 50px !important;
+          border-radius: 16px !important;
+          text-decoration: none !important;
+          font-weight: 700 !important;
+          font-size: 1.3em !important;
+          text-align: center !important;
+          transition: all 0.3s ease !important;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+          border: 3px solid #04626C !important;
+          min-width: 250px !important;
+          display: inline-block !important;
+          cursor: pointer !important;
+          max-width: 350px !important;
         }
 
-        .endpoint-list {
+        .main-button:hover {
+          background: #057a87 !important;
+          border-color: #057a87 !important;
+          transform: translateY(-4px) !important;
+          box-shadow: 0 8px 16px rgba(4, 98, 108, 0.5) !important;
+        }
+
+        .main-button:active {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 8px rgba(4, 98, 108, 0.4) !important;
+        }
+
+        .secondary-buttons {
           display: flex;
-          flex-direction: column;
-          gap: 15px;
+          gap: 20px;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
-        .endpoint-item {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          padding: 15px;
-          background: #f8f9fa;
-          border-radius: 8px;
-        }
-
-        .method {
-          padding: 4px 12px;
-          border-radius: 4px;
-          font-weight: bold;
-          font-size: 0.8em;
-          min-width: 60px;
-          text-align: center;
-        }
-
-        .method.get {
-          background: #27ae60;
-          color: white;
-        }
-
-        .method.post {
-          background: #e74c3c;
-          color: white;
-        }
-
-        .endpoint-url {
-          font-family: 'Monaco', 'Courier New', monospace;
-          color: #3498db;
-          text-decoration: none;
-          font-weight: 500;
-          min-width: 200px;
-        }
-
-        .endpoint-url:hover {
+        .secondary-buttons a {
+          color: #cccccc;
           text-decoration: underline;
         }
 
-        .endpoint-desc {
-          color: #7f8c8d;
-          flex: 1;
-        }
-
-        .actions {
-          display: flex;
-          gap: 20px;
-          justify-content: center;
-          margin: 50px 0;
-          flex-wrap: wrap;
-        }
-
-        .btn {
-          padding: 15px 30px;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 500;
-          font-size: 1.1em;
-          transition: all 0.2s;
-        }
-
-        .btn.primary {
-          background: #3498db;
-          color: white;
-        }
-
-        .btn.primary:hover {
-          background: #2980b9;
-          transform: translateY(-2px);
-        }
-
-        .btn.secondary {
-          background: #ecf0f1;
-          color: #2c3e50;
-        }
-
-        .btn.secondary:hover {
-          background: #d5dbdb;
-          transform: translateY(-2px);
+        .secondary-buttons a:hover {
+          color: #ffffff;
         }
 
         code {
-          background: #ecf0f1;
+          background: #1a1a1a;
+          color: #04626C;
+>>>>>>> electromalina/main
           padding: 2px 6px;
           border-radius: 4px;
           font-family: 'Monaco', 'Courier New', monospace;
@@ -239,6 +254,7 @@ export default function Home() {
             padding: 20px 15px;
           }
 
+<<<<<<< HEAD
           h1 {
             font-size: 2.5em;
           }
@@ -261,6 +277,18 @@ export default function Home() {
           .btn {
             width: 200px;
             text-align: center;
+=======
+          .main-button {
+            min-width: 200px;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            max-width: 100%;
+          }
+
+          .secondary-buttons {
+            flex-direction: column;
+            width: 100%;
+>>>>>>> electromalina/main
           }
         }
       `}</style>
@@ -269,12 +297,23 @@ export default function Home() {
         body {
           margin: 0;
           padding: 0;
+<<<<<<< HEAD
           background: #f5f5f5;
+=======
+          background: #000000;
+>>>>>>> electromalina/main
         }
 
         * {
           box-sizing: border-box;
         }
+<<<<<<< HEAD
+=======
+
+        a {
+          color: #cccccc;
+        }
+>>>>>>> electromalina/main
       `}</style>
     </>
   );
