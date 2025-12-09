@@ -528,40 +528,71 @@ function renderOverlay(yTop, yBot, cornerCols, frameCols, frameIndices) {
 
 >>>>>>> electromalina/main
 // =============================================================================
-// MINIMAP RENDERING
+// MINIMAP RENDERING (CIRCULAR VERSION)
 // =============================================================================
 
 /**
  * Render development minimap showing player position and gallery paintings
+ * Circular minimap design by Joëlle
  */
 export function renderMinimap() {
   const { x: px, y: py, angle: pa } = getPlayerPosition();
   const w = mini.width, h = mini.height;
-  
+
+  if (!mini._circleStyled) {
+    mini.style.borderRadius = '50%';
+    mini.style.overflow = 'hidden';
+    mini.style.backgroundColor = 'transparent';
+    mini._circleStyled = true;
+  }
+
+  mctx.clearRect(0, 0, w, h);
+
+  const centerX = w / 2;
+  const centerY = h / 2;
+  const radius  = Math.min(w, h) / 2;
+
+  mctx.save();          
+  mctx.beginPath();
+  mctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  mctx.clip();            
+
   mctx.fillStyle = '#fff';
-  mctx.fillRect(0, 0, w, h);
+  mctx.beginPath();
+  mctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  mctx.fill();
 
-  const cellX = Math.floor(w / mapW);
-  const cellY = Math.floor(h / mapH);
+  const drawableSize = radius * 2;
+
+  const cellX = Math.floor(drawableSize / mapW);
+  const cellY = Math.floor(drawableSize / mapH);
   const cell = Math.min(cellX, cellY);
-  const offsetX = Math.floor((w - cell * mapW) / 2);
-  const offsetY = Math.floor((h - cell * mapH) / 2);
 
-  // Draw map walls
+  const offsetX = centerX - (cell * mapW) / 2;
+  const offsetY = centerY - (cell * mapH) / 2;
+
+
+  const intCell = Math.floor(cell);
+
+
+  mctx.imageSmoothingEnabled = false;
+
   mctx.fillStyle = '#000';
   for (let y = 0; y < mapH; y++) {
     for (let x = 0; x < mapW; x++) {
       if (map[y][x] === 1) {
-        mctx.fillRect(offsetX + x * cell, offsetY + y * cell, cell, cell);
+        mctx.fillRect(
+          offsetX + x * intCell - 0.5,
+          offsetY + y * intCell - 0.5,
+          intCell + 1,
+          intCell + 1
+        );
       }
     }
   }
 
-<<<<<<< HEAD
+
   // Draw gallery paintings with different colors
-=======
-  // Draw gallery paintings as colored dots
->>>>>>> electromalina/main
   const markerColors = [
     '#ff0000', // Red
     '#00ff00', // Green
@@ -574,58 +605,44 @@ export function renderMinimap() {
     '#ff0088', // Pink
     '#00ff88', // Light Green
   ];
-  
+
   for (let i = 0; i < galleryFrames.length; i++) {
     const gf = galleryFrames[i];
-    
-<<<<<<< HEAD
+
     // Skip empty slots
-=======
->>>>>>> electromalina/main
     if (gf.title === 'Empty Slot' || gf.url === 'https://github.com') {
       continue;
     }
-    
-<<<<<<< HEAD
+
     // Use color based on index, cycling through the array
-=======
->>>>>>> electromalina/main
     const colorIndex = i % markerColors.length;
     mctx.fillStyle = markerColors[colorIndex];
-    
+
     let gx = offsetX + gf.x * cell;
     let gy = offsetY + gf.y * cell;
-    
+
     const offsetAmount = cell * DOT_OFFSET_FACTOR;
-    
+
     if (gf.x === 1) gx += offsetAmount;
     if (gf.x === mapW - 1) gx -= offsetAmount;
     if (gf.y === 1) gy += offsetAmount;
     if (gf.y === 11) gy -= offsetAmount;
-    
+
     const r = Math.max(2, Math.floor(cell * GALLERY_DOT_SIZE));
     mctx.beginPath();
     mctx.arc(gx, gy, r, 0, Math.PI * 2);
     mctx.fill();
-    
-<<<<<<< HEAD
-    // Add a white border to make markers more visible
-=======
->>>>>>> electromalina/main
-    mctx.strokeStyle = '#fff';
-    mctx.lineWidth = 1;
-    mctx.stroke();
   }
 
   // Draw player position and direction
   const pxp = offsetX + px * cell;
   const pyp = offsetY + py * cell;
-  
+
   mctx.fillStyle = '#000';
   mctx.beginPath();
   mctx.arc(pxp, pyp, Math.max(2, cell * PLAYER_DOT_SIZE), 0, Math.PI * 2);
   mctx.fill();
-  
+
   const lx = pxp + Math.cos(pa) * cell * DIRECTION_LINE_LENGTH;
   const ly = pyp + Math.sin(pa) * cell * DIRECTION_LINE_LENGTH;
   mctx.beginPath();
@@ -634,4 +651,6 @@ export function renderMinimap() {
   mctx.strokeStyle = '#000';
   mctx.lineWidth = 2;
   mctx.stroke();
+
+  mctx.restore();
 }
