@@ -25,6 +25,7 @@ export default function Home() {
           <div className="secondary-buttons">
             <Link href="/api">API Endpoints</Link>
             <Link href="/api/health">API Health Check</Link>
+            <Link href="/flipdot-preview">Flipdot Preview</Link>
           </div>
         </div>
       </div>
