@@ -1442,9 +1442,16 @@
     <button id="flipdotCastBtn" class="flipdot-button">
       ▶️ Cast to Flipdot Board
     </button>
+    <button id="flipdotLocalCastBtn" class="flipdot-button" style="background: #04626C; border-color: #04626C;">
+      🎯 Cast to Local Preview
+    </button>
     <div id="flipdotStatus" class="flipdot-status" data-state="idle">
       <span class="flipdot-status-text">Flipdot caster idle</span>
       <small id="flipdotStatusMeta">Target: 15 FPS</small>
+    </div>
+    <div id="flipdotLocalStatus" class="flipdot-status" data-state="idle" style="display:none;">
+      <span class="flipdot-status-text">Local preview idle</span>
+      <small id="flipdotLocalStatusMeta">localhost:3000</small>
     </div>
   </div>
 
@@ -1847,12 +1854,17 @@
     // =============================================================================
 
     const flipdotCastBtn = document.getElementById('flipdotCastBtn');
+    const flipdotLocalCastBtn = document.getElementById('flipdotLocalCastBtn');
     const flipdotStatusEl = document.getElementById('flipdotStatus');
     const flipdotStatusText = flipdotStatusEl?.querySelector('.flipdot-status-text');
     const flipdotStatusMeta = document.getElementById('flipdotStatusMeta');
+    const flipdotLocalStatusEl = document.getElementById('flipdotLocalStatus');
+    const flipdotLocalStatusText = flipdotLocalStatusEl?.querySelector('.flipdot-status-text');
+    const flipdotLocalStatusMeta = document.getElementById('flipdotLocalStatusMeta');
 
     // Use Vercel API routes instead of localhost
     const FLIPDOT_API_BASE = window.location.origin; // Uses current domain (Vercel)
+    const FLIPDOT_LOCAL_BASE = 'http://localhost:3000'; // Local development server
 
     const flipdotStreamState = {
       running: false,
@@ -1866,7 +1878,8 @@
       captureCtx: null,
       nextFrameTime: 0,
       droppedFrames: 0,
-      nextFrameNumber: 1
+      nextFrameNumber: 1,
+      isLocal: false // Track if we're casting to local or Vercel
     };
 
     // Initialize capture canvas for compositing
@@ -1879,11 +1892,25 @@
 
     if (flipdotCastBtn) {
       flipdotCastBtn.addEventListener('click', () => {
-        if (flipdotStreamState.running) {
+        if (flipdotStreamState.running && !flipdotStreamState.isLocal) {
           stopFlipdotStream('Flipdot stream paused');
         } else {
           startFlipdotStream().catch((error) => {
             console.error('[flipdot] Failed to start cast', error);
+            setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream idle');
+          });
+        }
+      });
+    }
+
+    // Local preview cast button
+    if (flipdotLocalCastBtn) {
+      flipdotLocalCastBtn.addEventListener('click', () => {
+        if (flipdotStreamState.running && flipdotStreamState.isLocal) {
+          stopFlipdotStream('Local preview stopped');
+        } else if (!flipdotStreamState.running) {
+          startFlipdotStream(true).catch((error) => { // true = isLocal
+            console.error('[flipdot] Failed to start local cast', error);
             setFlipdotStatus(`Error: ${error.message}`, 'error', 'Stream idle');
           });
         }
@@ -1899,16 +1926,31 @@
       }, 15000);
     }
 
-    async function startFlipdotStream() {
-      if (!flipdotCastBtn || flipdotStreamState.running) {
+    async function startFlipdotStream(isLocal = false) {
+      if (flipdotStreamState.running) {
         return;
       }
 
-      console.log('[flipdot] Starting live stream @', TARGET_FPS, 'FPS');
+      flipdotStreamState.isLocal = isLocal;
+      const btn = isLocal ? flipdotLocalCastBtn : flipdotCastBtn;
+      const statusEl = isLocal ? flipdotLocalStatusEl : flipdotStatusEl;
+      const statusText = isLocal ? flipdotLocalStatusText : flipdotStatusText;
+      const statusMeta = isLocal ? flipdotLocalStatusMeta : flipdotStatusMeta;
+
+      if (!btn) return;
+
+      console.log(`[flipdot] Starting ${isLocal ? 'local' : 'Vercel'} live stream @`, TARGET_FPS, 'FPS');
       console.log('[flipdot] Frame interval:', flipdotStreamState.frameInterval.toFixed(2), 'ms');
-      setFlipdotStatus('Starting flipdot stream...', 'pending', `Target: ${TARGET_FPS} FPS`);
-      flipdotCastBtn.classList.add('is-active');
-      flipdotCastBtn.textContent = '⏹ Stop Casting';
+      
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        if (statusText) statusText.textContent = `Starting ${isLocal ? 'local preview' : 'flipdot'} stream...`;
+        statusEl.setAttribute('data-state', 'pending');
+        if (statusMeta) statusMeta.textContent = `Target: ${TARGET_FPS} FPS`;
+      }
+      
+      btn.classList.add('is-active');
+      btn.textContent = isLocal ? '⏹ Stop Local Preview' : '⏹ Stop Casting';
       flipdotStreamState.running = true;
       flipdotStreamState.framesSent = 0;
       flipdotStreamState.droppedFrames = 0;
@@ -1986,20 +2028,25 @@
       flipdotStreamState.frameQueue = []; // Clear queue
       flipdotStreamState.nextFrameNumber = 1; // Reset frame counter
       
-      if (flipdotCastBtn) {
-        flipdotCastBtn.classList.remove('is-active');
-        flipdotCastBtn.textContent = '▶️ Cast to Flipdot Board';
+      const isLocal = flipdotStreamState.isLocal;
+      const btn = isLocal ? flipdotLocalCastBtn : flipdotCastBtn;
+      const statusEl = isLocal ? flipdotLocalStatusEl : flipdotStatusEl;
+      const statusText = isLocal ? flipdotLocalStatusText : flipdotStatusText;
+      const statusMeta = isLocal ? flipdotLocalStatusMeta : flipdotStatusMeta;
+      
+      if (btn) {
+        btn.classList.remove('is-active');
+        btn.textContent = isLocal ? '🎬 Cast to Local Preview' : '▶️ Cast to Flipdot Board';
       }
       
-      if (!skipStatus) {
+      if (!skipStatus && statusEl && statusText) {
         const droppedInfo = flipdotStreamState.droppedFrames > 0 
           ? ` (${flipdotStreamState.droppedFrames} dropped)` 
           : '';
-        setFlipdotStatus(
-          `${message} · ${flipdotStreamState.framesSent} frames${droppedInfo}`,
-          'idle',
-          `Target: ${TARGET_FPS} FPS`
-        );
+        statusText.textContent = `${message} · ${flipdotStreamState.framesSent} frames${droppedInfo}`;
+        statusEl.setAttribute('data-state', 'idle');
+        if (statusMeta) statusMeta.textContent = isLocal ? 'localhost:3000' : `Target: ${TARGET_FPS} FPS`;
+        if (isLocal) statusEl.style.display = 'none';
       }
     }
 
@@ -2031,7 +2078,12 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-        const response = await fetch(`${FLIPDOT_API_BASE}/api/flipdot/push-frame`, {
+        // Use local or Vercel API based on casting mode
+        const apiUrl = flipdotStreamState.isLocal 
+          ? `${FLIPDOT_LOCAL_BASE}/api/flipdot/push-frame`
+          : `${FLIPDOT_API_BASE}/api/flipdot/push-frame`;
+
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
